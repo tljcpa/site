@@ -1,0 +1,58 @@
+---
+import { getAllProjects } from "@/data/project";
+import PageLayout from "@/layouts/Base.astro";
+
+const projects = await getAllProjects();
+
+const meta = {
+	title: "项目",
+	description: "我做过的项目——个人、比赛、面试作品、开源复现。点进去看每个项目的来龙去脉。",
+};
+---
+
+<PageLayout meta={meta}>
+	<h1 class="title mb-2">项目</h1>
+	<p class="text-muted mb-10 text-sm">
+		近三个月的活儿。每个卡片点进去是这个项目怎么从零跑起来、踩过哪些坑的复盘。
+	</p>
+
+	<ul class="grid grid-cols-1 gap-5 sm:grid-cols-2" role="list">
+		{
+			projects.map((project) => (
+				<li class="border-muted/40 hover:border-accent flex flex-col rounded-md border p-5 transition-colors">
+					<div class="mb-2 flex items-center justify-between gap-2">
+						<a
+							href={`/projects/${project.id}/`}
+							class="text-accent text-lg font-semibold hover:underline"
+						>
+							{project.data.title}
+						</a>
+						<span class="bg-accent/10 text-muted shrink-0 rounded px-2 py-0.5 text-xs">
+							{project.data.kind}
+						</span>
+					</div>
+					{project.data.period && (
+						<p class="text-muted mb-2 text-xs">{project.data.period}</p>
+					)}
+					<p class="text-muted mb-3 grow text-sm">{project.data.description}</p>
+					{project.data.highlight && (
+						<p class="text-global-text mb-3 text-sm">
+							<span class="text-accent">→ </span>
+							{project.data.highlight}
+						</p>
+					)}
+					{project.data.stack.length > 0 && (
+						<ul class="flex flex-wrap gap-1.5" role="list">
+							{project.data.stack.map((tech) => (
+								<li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">
+									{tech}
+								</li>
+							))}
+						</ul>
+					)}
+				</li>
+			))
+		}
+	</ul>
+	{projects.length === 0 && <p>还没有项目,稍等。</p>}
+</PageLayout>

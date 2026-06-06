@@ -1,0 +1,32 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+
+const meta = {
+	description: "关于 tlj——做大模型微调、RAG 和全栈开发的工程师。",
+	title: "关于",
+};
+---
+
+<PageLayout meta={meta}>
+	<h1 class="title mb-12">关于</h1>
+	<div class="prose prose-sm prose-cactus max-w-none">
+		<p>
+			我是 tlj，主要做大模型微调、RAG 和全栈开发。这个站收录我近三个月做过的项目，以及过程中的工程复盘。
+		</p>
+		<p>
+			比起结论，我更想记录过程：一个功能为什么这样设计、踩过哪些坑、当时在几个方案之间如何权衡。这些内容在教程里很少见，却往往是真正花掉时间的地方。
+		</p>
+		<p>长期关注的方向：</p>
+		<ul class="list-inside list-disc" role="list">
+			<li>大模型微调与数据工程</li>
+			<li>检索增强（RAG）与评测</li>
+			<li>把模型能力落进可用产品的全栈工程</li>
+		</ul>
+		<p>
+			最近在入门<strong>具身智能与智能驾驶</strong>（VLM / VLA 方向），刚起步，<a class="cactus-link inline-block" href="/projects/drivegpt4-mini/">DriveGPT4-Mini</a> 是我在这个方向上的第一个动手复现。
+		</p>
+		<p>
+			想看具体做过什么，去 <a class="cactus-link inline-block" href="/projects/">项目</a>；想看过程，翻 <a class="cactus-link inline-block" href="/posts/">博客</a>。
+		</p>
+	</div>
+</PageLayout>

@@ -1,0 +1,67 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { getAllProjects } from "@/data/project";
+import PageLayout from "@/layouts/Base.astro";
+
+export const getStaticPaths = (async () => {
+	const projects = await getAllProjects();
+	return projects.map((project) => ({
+		params: { slug: project.id },
+		props: { project },
+	}));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { data } = project;
+---
+
+<PageLayout meta={{ title: data.title, description: data.description }}>
+	<a href="/projects/" class="text-muted hover:text-accent mb-6 inline-block text-sm">&larr; 项目</a>
+
+	<header class="mb-8">
+		<div class="mb-2 flex flex-wrap items-center gap-3">
+			<h1 class="title">{data.title}</h1>
+			<span class="bg-accent/10 text-muted rounded px-2 py-0.5 text-xs">{data.kind}</span>
+		</div>
+		<p class="text-muted text-sm">{data.description}</p>
+
+		<dl class="text-muted mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+			{data.period && (
+				<>
+					<dt class="text-global-text">时间</dt>
+					<dd>{data.period}</dd>
+				</>
+			)}
+			{data.role && (
+				<>
+					<dt class="text-global-text">角色</dt>
+					<dd>{data.role}</dd>
+				</>
+			)}
+			{data.highlight && (
+				<>
+					<dt class="text-global-text">成果</dt>
+					<dd>{data.highlight}</dd>
+				</>
+			)}
+		</dl>
+
+		{
+			data.stack.length > 0 && (
+				<ul class="mt-4 flex flex-wrap gap-1.5" role="list">
+					{data.stack.map((tech) => (
+						<li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">{tech}</li>
+					))}
+				</ul>
+			)
+		}
+	</header>
+
+	<article class="prose prose-cactus max-w-none">
+		<Content />
+	</article>
+</PageLayout>

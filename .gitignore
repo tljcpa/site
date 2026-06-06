@@ -1,0 +1,38 @@
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# misc
+*.pem
+.cache
+.astro
+# --- 本项目自定义 ---
+# 对话提取中间产物(含未脱敏digest),绝不上传
+tools/digests/
+tools/digests_clean/
+# 任何凭证
+**/pool.json
+*.env
+.env
+# 工具链便捷脚本(含本地路径)
+env.sh
+# 内部工具脚本(desensitize.py含真实公司名映射,不公开) + CC配置
+tools/
+.claude/

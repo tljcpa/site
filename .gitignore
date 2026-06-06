@@ -36,3 +36,4 @@ env.sh
 # 内部工具脚本(desensitize.py含真实公司名映射,不公开) + CC配置
 tools/
 .claude/
+.build.log

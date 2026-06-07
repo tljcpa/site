@@ -58,7 +58,7 @@ const featured = projects.filter((p) => p.data.featured && p.id !== "drivegpt4-m
 					<span class="bg-accent/15 text-accent rounded px-2 py-0.5 text-xs font-semibold">
 						旗舰 · 实习
 					</span>
-					<h2 class="title text-lg">最能代表我能力的项目</h2>
+					<h2 class="title text-lg">实习项目</h2>
 				</div>
 				<a
 					href={`/projects/${flagship.id}/`}
@@ -83,7 +83,7 @@ const featured = projects.filter((p) => p.data.featured && p.id !== "drivegpt4-m
 				{complianceSeries.length > 0 && (
 					<div class="border-accent/30 mt-4 border-l-2 pl-4">
 						<p class="text-muted mb-2 text-xs">
-							一个项目，我能写出 {complianceSeries.length} 篇深度复盘——这套厚度本身就是信号：
+							围绕这个项目的 {complianceSeries.length} 篇复盘，从数据、训练、评估到踩坑：
 						</p>
 						<ul class="space-y-1.5" role="list">
 							{complianceSeries.map((p, i) => (

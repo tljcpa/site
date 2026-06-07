@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="scroll-smooth" lang="zh-CN"> <head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>微调里那些会骗你的数字：一次从 loss=0.0137 查到数据结构的调查 • tlj 的工程笔记</title><link href="/icon.svg" rel="icon" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" type="image/png"><link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"><link href="/manifest.webmanifest" rel="manifest"><link href="https://zdwktlj.top/posts/finetune-misleading-metrics/" rel="canonical"><meta content="微调里那些会骗你的数字：一次从 loss=0.0137 查到数据结构的调查 • tlj 的工程笔记" name="title"><meta content="一个内容合规模型，训练 loss 低到 0.0137、准确率高到 93.6%，两个数字都是假的。这篇完整复盘怎么从一句乱码输出，一路查到截断、loss mask、训练推理错位，最后落到一个数据结构问题。" name="description"><meta content="tlj" name="author"><meta content="article" property="og:type"><meta content="微调里那些会骗你的数字：一次从 loss=0.0137 查到数据结构的调查" property="og:title"><meta content="一个内容合规模型，训练 loss 低到 0.0137、准确率高到 93.6%，两个数字都是假的。这篇完整复盘怎么从一句乱码输出，一路查到截断、loss mask、训练推理错位，最后落到一个数据结构问题。" property="og:description"><meta content="https://zdwktlj.top/posts/finetune-misleading-metrics/" property="og:url"><meta content="tlj 的工程笔记" property="og:site_name"><meta content="zh_CN" property="og:locale"><meta content="https://zdwktlj.top/og-image/finetune-misleading-metrics.png" property="og:image"><meta content="1200" property="og:image:width"><meta content="630" property="og:image:height"><meta content="tlj" property="article:author"><meta content="2026-05-20T00:00:00.000Z" property="article:published_time"><meta content="summary_large_image" property="twitter:card"><meta content="https://zdwktlj.top/posts/finetune-misleading-metrics/" property="twitter:url"><meta content="微调里那些会骗你的数字：一次从 loss=0.0137 查到数据结构的调查" property="twitter:title"><meta content="一个内容合规模型，训练 loss 低到 0.0137、准确率高到 93.6%，两个数字都是假的。这篇完整复盘怎么从一句乱码输出，一路查到截断、loss mask、训练推理错位，最后落到一个数据结构问题。" property="twitter:description"><meta content="https://zdwktlj.top/og-image/finetune-misleading-metrics.png" property="twitter:image"><link href="/sitemap-index.xml" rel="sitemap"><link href="/rss.xml" title="Blog" rel="alternate" type="application/rss+xml"><link href="/notes/rss.xml" title="Notes" rel="alternate" type="application/rss+xml"><meta content="Astro v6.3.3" name="generator"><script>
+<!DOCTYPE html><html class="scroll-smooth" lang="zh-CN"> <head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>溯源率到底是多少：同一个合规模型，怎么从 29% 算到 96% • tlj 的工程笔记</title><link href="/icon.svg" rel="icon" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" type="image/png"><link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"><link href="/manifest.webmanifest" rel="manifest"><link href="https://zdwktlj.top/posts/finetune-misleading-metrics/" rel="canonical"><meta content="溯源率到底是多少：同一个合规模型，怎么从 29% 算到 96% • tlj 的工程笔记" name="title"><meta content="一个内容合规模型，我给自己定的硬指标是每条违规要能精确溯源到具体规则、命中 90%。但做到后期才发现，最难的不是把这个数字做上去，而是搞清楚它到底该怎么算——同一个模型，换个口径就能从 29% 变成 96%。这篇是这条主线的完整复盘。" name="description"><meta content="tlj" name="author"><meta content="article" property="og:type"><meta content="溯源率到底是多少：同一个合规模型，怎么从 29% 算到 96%" property="og:title"><meta content="一个内容合规模型，我给自己定的硬指标是每条违规要能精确溯源到具体规则、命中 90%。但做到后期才发现，最难的不是把这个数字做上去，而是搞清楚它到底该怎么算——同一个模型，换个口径就能从 29% 变成 96%。这篇是这条主线的完整复盘。" property="og:description"><meta content="https://zdwktlj.top/posts/finetune-misleading-metrics/" property="og:url"><meta content="tlj 的工程笔记" property="og:site_name"><meta content="zh_CN" property="og:locale"><meta content="https://zdwktlj.top/og-image/finetune-misleading-metrics.png" property="og:image"><meta content="1200" property="og:image:width"><meta content="630" property="og:image:height"><meta content="tlj" property="article:author"><meta content="2026-05-20T00:00:00.000Z" property="article:published_time"><meta content="summary_large_image" property="twitter:card"><meta content="https://zdwktlj.top/posts/finetune-misleading-metrics/" property="twitter:url"><meta content="溯源率到底是多少：同一个合规模型，怎么从 29% 算到 96%" property="twitter:title"><meta content="一个内容合规模型，我给自己定的硬指标是每条违规要能精确溯源到具体规则、命中 90%。但做到后期才发现，最难的不是把这个数字做上去，而是搞清楚它到底该怎么算——同一个模型，换个口径就能从 29% 变成 96%。这篇是这条主线的完整复盘。" property="twitter:description"><meta content="https://zdwktlj.top/og-image/finetune-misleading-metrics.png" property="twitter:image"><link href="/sitemap-index.xml" rel="sitemap"><link href="/rss.xml" title="Blog" rel="alternate" type="application/rss+xml"><link href="/notes/rss.xml" title="Notes" rel="alternate" type="application/rss+xml"><meta content="Astro v6.3.3" name="generator"><script>
 	const lightModePref = window.matchMedia("(prefers-color-scheme: light)");
 
 	function getUserPref() {
@@ -44,47 +44,140 @@
 
 	// listen for prefers-color-scheme change.
 	lightModePref.addEventListener("change", (e) => setTheme(e.matches ? "light" : "dark"));
-</script><link rel="stylesheet" href="/_astro/Base.qyQGao5D.b6.css"></head> <body class="bg-global-bg text-global-text mx-auto flex min-h-screen max-w-3xl flex-col px-4 pt-16 font-mono text-sm font-normal antialiased sm:px-8"> <a class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5" href="#main">skip to content
-</a> <header class="group relative mb-28 flex items-center sm:ps-18" id="main-header"> <div class="flex sm:flex-col"> <a aria-current="false" class="inline-flex items-center sm:relative sm:inline-block sm:grayscale sm:hover:filter-none" href="/"> <svg aria-hidden="true" class="me-3 h-10 w-6 sm:absolute sm:-start-18 sm:me-0 sm:h-20 sm:w-12" fill="none" focusable="false" viewBox="0 0 272 480" xmlns="http://www.w3.org/2000/svg"> <title>Astro Cactus Logo</title> <path fill="#cdffb8" d="M181.334 93.333v-40L226.667 80v40zM136.001 53.333 90.667 26.667v426.666L136.001 480zM45.333 220 0 193.334v140L45.333 360z"></path><path fill="#d482ab" d="M90.667 26.667 136.001 0l45.333 26.667-45.333 26.666zM181.334 53.33l45.333-26.72L272 53.33 226.667 80zM136 240l-45.333-26.67v53.34zM0 193.33l45.333-26.72 45.334 26.72L45.333 220zM181.334 93.277 226.667 120l-45.333 26.67z"></path><path fill="#2abc89" d="m136 53.333 45.333-26.666v120L226.667 120V80L272 53.333V160l-90.667 53.333v240L136 480V306.667L45.334 360V220l45.333-26.667v73.334L136 240z"></path> </svg> <span class="text-xl font-bold sm:text-2xl">tlj 的工程笔记</span> </a> <nav aria-label="Main menu" class="bg-global-bg absolute -inset-x-4 top-12 hidden flex-col divide-y px-2 py-4 group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:z-auto sm:-ms-4 sm:mt-1 sm:flex sm:flex-row sm:divide-x sm:divide-y-0 sm:bg-transparent sm:p-0" id="navigation-menu"> <a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/"> 首页 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/projects/"> 项目 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/posts/"> 博客 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/about/"> 关于 </a> </nav> </div> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D5egCzIc.js"></script> <pagefind-config baseUrl="/" bundle-path="/pagefind/"></pagefind-config> <pagefind-modal-trigger id="search" class="ms-auto" hide-shortcut="true" compact="true"></pagefind-modal-trigger> <pagefind-modal></pagefind-modal> <theme-toggle class="ms-2 sm:ms-4"> <button class="hover:text-accent relative h-9 w-9 cursor-pointer p-2" type="button"> <span class="sr-only">Dark Theme</span> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" fill="none" focusable="false" id="sun-svg" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" fill="none" focusable="false" id="moon-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M0 0h24v24H0z" fill="none" stroke="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.C1tldoqx.js"></script> <mobile-button> <button aria-expanded="false" aria-haspopup="menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" id="toggle-navigation-menu" type="button"> <span class="sr-only">Open main menu</span> <svg aria-hidden="true" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" fill="none" focusable="false" id="line-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M3.75 9h16.5m-16.5 6.75h16.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="text-accent absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" class="text-accent" fill="none" focusable="false" id="cross-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </button> </mobile-button> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DuSsDY4R.js"></script> <main id="main">  <article class="grow break-words" data-pagefind-body> <div id="blog-hero" class="mb-12"><h1 class="title"> 微调里那些会骗你的数字：一次从 loss=0.0137 查到数据结构的调查 </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-05-20T00:00:00.000Z" title="2026-05-20T00:00:00.000Z">2026年5月20日</time> /  13 min read </p>  </div> <div class="mt-2"> <svg aria-hidden="true" class="inline-block h-6 w-6" fill="none" focusable="false" stroke="var(--color-muted)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M0 0h24v24H0z" fill="none" stroke="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:大模型微调" href="/tags/大模型微调/"><span class="sr-only">View more blogs with the tag&nbsp;</span>大模型微调 </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:评估" href="/tags/评估/"><span class="sr-only">View more blogs with the tag&nbsp;</span>评估 </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:lora" href="/tags/lora/"><span class="sr-only">View more blogs with the tag&nbsp;</span>lora </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:调试" href="/tags/调试/"><span class="sr-only">View more blogs with the tag&nbsp;</span>调试 </a> </span>  </div></div> <div class="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between"> <details open class="lg:sticky lg:top-12 lg:order-2 lg:-me-32 lg:basis-64"> <summary class="title hover:marker:text-accent cursor-pointer text-lg">Table of Contents</summary> <nav class="ms-4 lg:w-full"> <ol class="mt-4"> <li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#先理解架构为什么是按类别逐一推理"><span aria-hidden="true" class="me-0.5">#</span>先理解架构：为什么是”按类别逐一推理”</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#症状公众号在胡说"><span aria-hidden="true" class="me-0.5">#</span>症状：公众号在胡说</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#第一层prompt-9663-tokens训练-cutoff-1024"><span aria-hidden="true" class="me-0.5">#</span>第一层：prompt 9663 tokens，训练 cutoff 1024</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#假象一loss00137-是怎么被算低的"><span aria-hidden="true" class="me-0.5">#</span>假象一：loss=0.0137 是怎么被算低的</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#假象二936-准确率是在没看规则的情况下蒙的"><span aria-hidden="true" class="me-0.5">#</span>假象二：93.6% 准确率是在”没看规则”的情况下蒙的</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#一个好问题数据没超-1024为什么也不行"><span aria-hidden="true" class="me-0.5">#</span>一个好问题：数据没超 1024，为什么也不行</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#根因这是数据结构问题不是代码-bug"><span aria-hidden="true" class="me-0.5">#</span>根因：这是数据结构问题，不是代码 bug</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#修复以及它的诚实边界"><span aria-hidden="true" class="me-0.5">#</span>修复，以及它的诚实边界</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#留下的几条习惯"><span aria-hidden="true" class="me-0.5">#</span>留下的几条习惯</a>  </li> </ol> </nav> </details> <div class="prose prose-sm prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:before:absolute prose-headings:before:-ms-4 prose-headings:before:text-muted prose-headings:hover:before:text-accent sm:prose-headings:before:content-['#'] sm:prose-th:before:content-none">  <p>先交代背景。这是一个内容合规质检模型：给定一段文案和一批平台规则，判断它违没违规、违反了哪条。基座是 Qwen2.5-14B-Instruct，LoRA 微调（rank=64, alpha=128, target=all），覆盖四个平台——小红书、抖音、视频号、公众号。</p>
-<p>训练完，两个指标好得让人想直接收工：train_loss <strong>0.0137</strong>，全量准确率 <strong>93.6%</strong>。</p>
-<p>这篇就是讲，这两个数字怎么一步步被我自己拆穿，以及它们最后一起指向的那个真问题——它不在模型里，在数据结构里。</p>
-<h2 id="先理解架构为什么是按类别逐一推理"><a class="not-prose" href="#先理解架构为什么是按类别逐一推理">先理解架构：为什么是”按类别逐一推理”</a></h2>
-<p>这点不讲清楚，后面的 bug 没法理解。</p>
-<p>一条文案可能同时踩多条规则。直觉做法是把一个平台的所有规则塞进一个 prompt，让模型一次性判完。但我们的架构不是这样——它是<strong>按规则类别（category）逐一推理，再把结果 union</strong>：</p>
-<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.a8zzi.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#f8f8f2;--1:#24292e">文案："买了就送礼，AI画像帮你定制专属方案"</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#f8f8f2;--1:#24292e">  </span></span><span style="--0:#f8f8f2;--1:#24292e">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#f8f8f2;--1:#24292e">对「营销类别」(8条规则)推理   → 违规1：夸大效果</span></div></div><div class="ec-line"><div class="code"><span style="--0:#f8f8f2;--1:#24292e">对「AI内容类别」(5条规则)推理 → 违规2：AI功能误导</span></div></div><div class="ec-line"><div class="code"><span style="--0:#f8f8f2;--1:#24292e">对「其他类别」...             → 无违规</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#f8f8f2;--1:#24292e">  </span></span><span style="--0:#f8f8f2;--1:#24292e">↓</span></div></div><div class="ec-line"><div class="code"><span style="--0:#f8f8f2;--1:#24292e">union → violations: [违规1, 违规2]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="文案：&#x22;买了就送礼，AI画像帮你定制专属方案&#x22;  ↓对「营销类别」(8条规则)推理   → 违规1：夸大效果对「AI内容类别」(5条规则)推理 → 违规2：AI功能误导对「其他类别」...             → 无违规  ↓union → violations: [违规1, 违规2]"><div></div></button></div></figure></div>
-<p>这样设计有两个好处：每次 prompt 短（只装一个类别的几条规则），模型注意力集中；一条文案的多处违规，在不同类别的推理里分别被抓到，最后合并。<strong>多处违规是靠”多次短推理 + 合并”覆盖的，不是靠”一次长推理”。</strong> 记住这句，它是后面所有问题的钥匙。</p>
-<h2 id="症状公众号在胡说"><a class="not-prose" href="#症状公众号在胡说">症状：公众号在胡说</a></h2>
-<p>四个平台里，小红书、抖音、视频号都正常，唯独公众号的输出是这样的乱码——模型不输出 JSON 判定结果，而是在<strong>续写规则文本</strong>（<code>支付费用后可获得投票资格...</code>）。</p>
-<p>模型在续写输入，说明它根本没读到那条”请输出 JSON”的指令。为什么？</p>
-<h2 id="第一层prompt-9663-tokens训练-cutoff-1024"><a class="not-prose" href="#第一层prompt-9663-tokens训练-cutoff-1024">第一层：prompt 9663 tokens，训练 cutoff 1024</a></h2>
-<p>去量了一下：公众号每条样本的 system prompt 长达 <strong>9663 tokens</strong>，而训练时 <code>cutoff_len</code> 设的是 <strong>1024</strong>。</p>
-<p>prompt 被从中间截断，模型在训练时压根没看到末尾的 JSON 指令，自然学不会在那个位置输出 JSON。推理时它看到一段被截断、停在规则中间的输入，就顺着续写下去了。</p>
-<p>到这一步，“乱码”解释通了。但真正有意思的是它牵出的两个假象。</p>
-<h2 id="假象一loss00137-是怎么被算低的"><a class="not-prose" href="#假象一loss00137-是怎么被算低的">假象一：loss=0.0137 是怎么被算低的</a></h2>
-<p>LoRA 微调收敛到 0.0137 是反常的——这种量级要么过拟合，要么哪里不对。真相是：它被<strong>截断 + loss mask</strong>联合算低了。</p>
-<p>训练时只在”助手输出”那部分 token 上计算损失（loss mask）。而公众号、视频号这些长样本，助手输出常常落在 1024 之后，<strong>被截断的部分根本不参与损失计算</strong>。难样本的难 token 大量缺席，平均下来 loss 自然低。</p>
-<p>0.0137 不代表模型学得好，它代表大量该算的 token 没被算进去。</p>
-<p>后来把 cutoff 放开到 4096 重训（exp_006），同样的数据、同样的模型，train_loss 变成 <strong>0.245</strong>。所有 token 都参与计算后，这才是真实水平。</p>
-<blockquote>
-<p><strong>结论：loss 的绝对值取决于你在多少 token、哪些 token 上计算它。截断不同、loss mask 不同，loss 就不可比。</strong> exp_005 的 0.0137 和 exp_006 的 0.245 之间没有”变差”，只是前者算的是一个缩了水的子集。</p>
-</blockquote>
-<p>这里还有个容易忽略的细节：对公众号样本，cutoff=1024 时模型只看得到大约<strong>3 条规则</strong>，对应的梯度信号接近于零——也就是说，公众号这部分数据在训练里近乎”空转”，既没贡献有效 loss，也没贡献有效梯度。</p>
-<h2 id="假象二936-准确率是在没看规则的情况下蒙的"><a class="not-prose" href="#假象二936-准确率是在没看规则的情况下蒙的">假象二：93.6% 准确率是在”没看规则”的情况下蒙的</a></h2>
-<p>奇怪的是，全量评估时公众号还有 95.6% 的 JSON 有效率、93.6% 的准确率。一个连规则都没读到的模型，怎么还能答对？</p>
-<p>去拆评估的实际输入，问题浮出来。批量评估用了 <code>padding_side="left"</code>，超长时的截断方向是<strong>去头保尾</strong>：</p>
+</script><link rel="stylesheet" href="/_astro/Base.DIiK1YUT.b6.css"></head> <body class="bg-global-bg text-global-text mx-auto flex min-h-screen max-w-3xl flex-col px-4 pt-16 font-mono text-sm font-normal antialiased sm:px-8"> <a class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5" href="#main">skip to content
+</a> <header class="group relative mb-28 flex items-center sm:ps-18" id="main-header"> <div class="flex sm:flex-col"> <a aria-current="false" class="inline-flex items-center sm:relative sm:inline-block sm:grayscale sm:hover:filter-none" href="/"> <svg aria-hidden="true" class="me-3 h-10 w-6 sm:absolute sm:-start-18 sm:me-0 sm:h-20 sm:w-12" fill="none" focusable="false" viewBox="0 0 272 480" xmlns="http://www.w3.org/2000/svg"> <title>Astro Cactus Logo</title> <path fill="#cdffb8" d="M181.334 93.333v-40L226.667 80v40zM136.001 53.333 90.667 26.667v426.666L136.001 480zM45.333 220 0 193.334v140L45.333 360z"></path><path fill="#d482ab" d="M90.667 26.667 136.001 0l45.333 26.667-45.333 26.666zM181.334 53.33l45.333-26.72L272 53.33 226.667 80zM136 240l-45.333-26.67v53.34zM0 193.33l45.333-26.72 45.334 26.72L45.333 220zM181.334 93.277 226.667 120l-45.333 26.67z"></path><path fill="#2abc89" d="m136 53.333 45.333-26.666v120L226.667 120V80L272 53.333V160l-90.667 53.333v240L136 480V306.667L45.334 360V220l45.333-26.667v73.334L136 240z"></path> </svg> <span class="text-xl font-bold sm:text-2xl">tlj 的工程笔记</span> </a> <nav aria-label="Main menu" class="bg-global-bg absolute -inset-x-4 top-12 hidden flex-col divide-y px-2 py-4 group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:z-auto sm:-ms-4 sm:mt-1 sm:flex sm:flex-row sm:divide-x sm:divide-y-0 sm:bg-transparent sm:p-0" id="navigation-menu"> <a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/"> 首页 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/projects/"> 项目 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/posts/"> 博客 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/about/"> 关于 </a> </nav> </div> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D5egCzIc.js"></script> <pagefind-config baseUrl="/" bundle-path="/pagefind/"></pagefind-config> <pagefind-modal-trigger id="search" class="ms-auto" hide-shortcut="true" compact="true"></pagefind-modal-trigger> <pagefind-modal></pagefind-modal> <theme-toggle class="ms-2 sm:ms-4"> <button class="hover:text-accent relative h-9 w-9 cursor-pointer p-2" type="button"> <span class="sr-only">Dark Theme</span> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" fill="none" focusable="false" id="sun-svg" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" fill="none" focusable="false" id="moon-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M0 0h24v24H0z" fill="none" stroke="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.C1tldoqx.js"></script> <mobile-button> <button aria-expanded="false" aria-haspopup="menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" id="toggle-navigation-menu" type="button"> <span class="sr-only">Open main menu</span> <svg aria-hidden="true" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" fill="none" focusable="false" id="line-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M3.75 9h16.5m-16.5 6.75h16.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="text-accent absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" class="text-accent" fill="none" focusable="false" id="cross-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </button> </mobile-button> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DuSsDY4R.js"></script> <main id="main">  <article class="grow break-words" data-pagefind-body> <div id="blog-hero" class="mb-12"><h1 class="title"> 溯源率到底是多少：同一个合规模型，怎么从 29% 算到 96% </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-05-20T00:00:00.000Z" title="2026-05-20T00:00:00.000Z">2026年5月20日</time> /  15 min read </p>  </div> <div class="mt-2"> <svg aria-hidden="true" class="inline-block h-6 w-6" fill="none" focusable="false" stroke="var(--color-muted)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M0 0h24v24H0z" fill="none" stroke="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:大模型微调" href="/tags/大模型微调/"><span class="sr-only">View more blogs with the tag&nbsp;</span>大模型微调 </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:rag" href="/tags/rag/"><span class="sr-only">View more blogs with the tag&nbsp;</span>rag </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:评估" href="/tags/评估/"><span class="sr-only">View more blogs with the tag&nbsp;</span>评估 </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:调试" href="/tags/调试/"><span class="sr-only">View more blogs with the tag&nbsp;</span>调试 </a> </span>  </div></div> <div class="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between"> <details open class="lg:sticky lg:top-12 lg:order-2 lg:-me-32 lg:basis-64"> <summary class="title hover:marker:text-accent cursor-pointer text-lg">Table of Contents</summary> <nav class="ms-4 lg:w-full"> <ol class="mt-4"> <li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#系统长什么样"><span aria-hidden="true" class="me-0.5">#</span>系统长什么样</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#第一批假指标00137-的-loss-和-93-的准确率"><span aria-hidden="true" class="me-0.5">#</span>第一批假指标：0.0137 的 loss 和 93% 的准确率</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#per-category-vs-rag按下葫芦浮起瓢"><span aria-hidden="true" class="me-0.5">#</span>per-category vs RAG：按下葫芦浮起瓢</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#最隐蔽的-bug模型在背答案不是在读题"><span aria-hidden="true" class="me-0.5">#</span>最隐蔽的 bug：模型在背答案，不是在读题</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#越改越糟一次灾难性的重训"><span aria-hidden="true" class="me-0.5">#</span>越改越糟：一次灾难性的重训</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#溯源率到底是多少29-还是-96"><span aria-hidden="true" class="me-0.5">#</span>溯源率到底是多少：29% 还是 96%</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#这个项目教给我的"><span aria-hidden="true" class="me-0.5">#</span>这个项目教给我的</a>  </li> </ol> </nav> </details> <div class="prose prose-sm prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:before:absolute prose-headings:before:-ms-4 prose-headings:before:text-muted prose-headings:hover:before:text-accent sm:prose-headings:before:content-['#'] sm:prose-th:before:content-none">  <p>这是我做过投入最大的一个项目：微调 Qwen2.5-14B-Instruct 做内容合规质检，覆盖四个平台（小红书、抖音、视频号、公众号）。输入一段文案加一批平台规则，输出结构化 JSON——是否违规、违规原文、以及<strong>精确到具体哪一条规则</strong>。</p>
+<p>我给自己定了条硬线：<strong>溯源率 90%</strong>。判出违规只是及格，能指准”违反的是哪一条”才是核心。整个项目几个星期，主线就是冲这条线。但越往后越发现，真正难的不是把数字做上去，而是搞清楚这个数字到底该怎么算——因为同一个模型，换个口径，溯源率能从 29% 变成 96%。</p>
+<p>先说结论：这篇里最值钱的不是某个超参，是”不相信任何单一指标”这件事，以及一个 AI 在指标造假压力下到底该不该划线。</p>
+<h2 id="系统长什么样"><a class="not-prose" href="#系统长什么样">系统长什么样</a></h2>
+<p>任务输出是这样的 JSON：</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.a8zzi.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame"><figcaption class="header"></figcaption><pre data-language="json"><code><div class="ec-line"><div class="code"><span style="--0:#F8F8F2;--1:#24292E">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--1:#005CC5"><span style="--0:#8BE9FE">"</span><span style="--0:#8BE9FD">is_compliant</span><span style="--0:#8BE9FE">"</span></span><span style="--1:#24292E"><span style="--0:#FF79C6">:</span><span style="--0:#F8F8F2"> </span></span><span style="--0:#BD93F9;--1:#005CC5">false</span><span style="--0:#F8F8F2;--1:#24292E">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--1:#005CC5"><span style="--0:#8BE9FE">"</span><span style="--0:#8BE9FD">violations</span><span style="--0:#8BE9FE">"</span></span><span style="--1:#24292E"><span style="--0:#FF79C6">:</span><span style="--0:#F8F8F2"> [</span></span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#F8F8F2;--1:#24292E">    </span></span><span style="--0:#F8F8F2;--1:#24292E">{ </span><span style="--1:#005CC5"><span style="--0:#8BE9FE">"</span><span style="--0:#8BE9FD">original_text</span><span style="--0:#8BE9FE">"</span></span><span style="--1:#24292E"><span style="--0:#FF79C6">:</span><span style="--0:#F8F8F2"> </span></span><span style="--1:#032F62"><span style="--0:#E9F284">"</span><span style="--0:#F1FA8C">违规原文（精确子串，≥10字）</span><span style="--0:#E9F284">"</span></span><span style="--0:#F8F8F2;--1:#24292E">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">      </span><span style="--1:#005CC5"><span style="--0:#8BE9FE">"</span><span style="--0:#8BE9FD">title</span><span style="--0:#8BE9FE">"</span></span><span style="--1:#24292E"><span style="--0:#FF79C6">:</span><span style="--0:#F8F8F2"> </span></span><span style="--1:#032F62"><span style="--0:#E9F284">"</span><span style="--0:#F1FA8C">文档名-第X条 规则名</span><span style="--0:#E9F284">"</span></span><span style="--0:#F8F8F2;--1:#24292E">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">      </span><span style="--1:#005CC5"><span style="--0:#8BE9FE">"</span><span style="--0:#8BE9FD">content</span><span style="--0:#8BE9FE">"</span></span><span style="--1:#24292E"><span style="--0:#FF79C6">:</span><span style="--0:#F8F8F2"> </span></span><span style="--1:#032F62"><span style="--0:#E9F284">"</span><span style="--0:#F1FA8C">规则说明</span><span style="--0:#E9F284">"</span></span><span style="--0:#F8F8F2;--1:#24292E">, </span><span style="--1:#005CC5"><span style="--0:#8BE9FE">"</span><span style="--0:#8BE9FD">suggestion</span><span style="--0:#8BE9FE">"</span></span><span style="--1:#24292E"><span style="--0:#FF79C6">:</span><span style="--0:#F8F8F2"> </span></span><span style="--1:#032F62"><span style="--0:#E9F284">"</span><span style="--0:#F1FA8C">修改建议</span><span style="--0:#E9F284">"</span></span><span style="--0:#F8F8F2;--1:#24292E"> }</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#F8F8F2;--1:#24292E">  </span></span><span style="--0:#F8F8F2;--1:#24292E">]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#F8F8F2;--1:#24292E">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="{  &#x22;is_compliant&#x22;: false,  &#x22;violations&#x22;: [    { &#x22;original_text&#x22;: &#x22;违规原文（精确子串，≥10字）&#x22;,      &#x22;title&#x22;: &#x22;文档名-第X条 规则名&#x22;,      &#x22;content&#x22;: &#x22;规则说明&#x22;, &#x22;suggestion&#x22;: &#x22;修改建议&#x22; }  ]}"><div></div></button></div></figure></div>
+<p>训练数据 6849 条（违规 6077、合规样本若干），每条样本只给模型看 <strong>1-3 条规则</strong>——它学的是”给你这几条规则，判断违没违反”，是个逐规则检查器，不是一次扫全量。这个细节后面会反复回来咬我。</p>
+<p>四个平台的规则结构差异极大，这点决定了后面所有方案：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>平台</th><th>规则数</th><th>类别数</th><th>最大单类</th></tr></thead><tbody><tr><td>小红书</td><td>49</td><td>14</td><td>6 条</td></tr><tr><td>抖音</td><td>107</td><td>21</td><td>10 条</td></tr><tr><td>视频号</td><td>135</td><td>11</td><td>18 条</td></tr><tr><td><strong>公众号</strong></td><td><strong>53</strong></td><td><strong>1</strong></td><td><strong>53 条</strong></td></tr></tbody></table>
+<p>公众号 53 条规则全挤在一个类别里——这一个数据结构上的差异，后面让它的效果比别的平台差了 5 倍。</p>
+<h2 id="第一批假指标00137-的-loss-和-93-的准确率"><a class="not-prose" href="#第一批假指标00137-的-loss-和-93-的准确率">第一批假指标：0.0137 的 loss 和 93% 的准确率</a></h2>
+<p>第一版 exp_005 训练完，train_loss <strong>0.0137</strong>，首轮评估合规判断 <strong>93-95%</strong>。我没敢信，结果它们都是假的。</p>
 <ul>
-<li><strong>尾部保住了</strong>——那段”请输出 JSON”的指令在结尾，所以模型还能吐出格式合法的 JSON（95.6% JSON 有效率的由来）；</li>
-<li><strong>头部被砍了</strong>——而<strong>规则正文都在前面</strong>，被截掉了。模型实际只看到最后 1024 个 token。</li>
+<li><strong>loss 假在截断</strong>。exp_005 的 <code>cutoff_len=1024</code>，但视频号最大类别要 3438 tokens、公众号 53 条要 11505 tokens。规则被从中间截断，助手输出落在 1024 之外、<strong>不参与损失计算</strong>。难 token 大量缺席，平均 loss 被算到 0.0137。后来 cutoff 放开到 4096 重训，同样数据 loss 变 0.245——这才是真的。</li>
+<li><strong>准确率假在评估格式</strong>。首轮评估一次性把全平台规则塞进一个 prompt，但模型训练时只见过 1-3 条规则的格式，从没见过”一次几十条”。它在一个完全陌生的输入分布上被测，93% 没有意义。而且同一批评估里，<strong>title 匹配率（也就是溯源率）只有 35-52%</strong>——溯源不行的信号，第一次出现。</li>
 </ul>
-<p>也就是说，这 93.6% 是模型在<strong>几乎没看到规则</strong>的情况下做出的判断。它大概率学到了一个先验——多数文案是合规的——靠这个先验蒙，也能到九成。这个准确率衡量的不是”按规则判断的能力”，而是”没有规则时的基线猜测”。</p>
-<blockquote>
-<p><strong>一个评估数字，如果你不去核对模型到底看到了什么输入，就可能把流程里的截断 bug，误读成模型的能力。</strong></p>
-</blockquote>
-<h2 id="一个好问题数据没超-1024为什么也不行"><a class="not-prose" href="#一个好问题数据没超-1024为什么也不行">一个好问题：数据没超 1024，为什么也不行</a></h2>
-<p>调查到这里，被问了一句很关键的话：“我们的数据集似乎并没有超过 1024，为什么也不行？”</p>
-<p>这正是最容易混淆的点。超长的不是<strong>数据样本</strong>（那段待判定的文案很短），超长的是<strong>system prompt</strong>——也就是塞进去的那一大堆规则。一条公众号样本 = 短文案 + 53 条规则的长 prompt，长度由规则贡献，不由数据贡献。所以”数据没超 1024”和”样本被截断”两件事并不矛盾。</p>
-<h2 id="根因这是数据结构问题不是代码-bug"><a class="not-prose" href="#根因这是数据结构问题不是代码-bug">根因：这是数据结构问题，不是代码 bug</a></h2>
-<p>为什么偏偏是公众号？我把四个平台的规则结构摆在一起：</p>
+<p>把评估改成”按类别逐组推理再合并”（per-category，对齐训练格式），不用重训，溯源这才测得准。</p>
+<h2 id="per-category-vs-rag按下葫芦浮起瓢"><a class="not-prose" href="#per-category-vs-rag按下葫芦浮起瓢">per-category vs RAG：按下葫芦浮起瓢</a></h2>
+<p>修正评估格式后，真实数字露出来，而且是一对相反的麻烦：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>平台</th><th>方案</th><th>规则 Recall</th><th>规则 Precision</th></tr></thead><tbody><tr><td>小红书</td><td>per-category</td><td>75%</td><td><strong>8%</strong></td></tr><tr><td>抖音</td><td>per-category</td><td>75%</td><td><strong>5.1%</strong></td></tr><tr><td>视频号</td><td>per-category</td><td>58.3%</td><td>5.5%</td></tr><tr><td>公众号</td><td>RAG top-10</td><td>8.3%</td><td>11.1%</td></tr></tbody></table>
+<p>per-category 把每个类别都跑一遍，所以<strong>漏得少（Recall 高）</strong>，但模型”看见规则就想找违规”，对大量无关规则也报 violation，<strong>精确率塌到 5-8%</strong>（误报爆炸）。RAG 只检索 top-10 相关规则，精确率好看点，但相关规则一旦没检索到，模型根本看不见，<strong>召回崩</strong>。</p>
+<p>误报到底多夸张？某轮 per-category 上：小红书 TP=9 / FP=103，抖音 TP=9 / FP=166。模型平均每条样本预测 5.6-8.8 条违规，而真实期望只有 0.6 条。而且<strong>误报 100% 来自违规样本的”多报”，合规样本零误报</strong>——它不是把好的判成坏的，是把坏的判出一大堆莫须有的违规。</p>
+<p>为什么 RAG 不能简单加大 top-k？因为瓶颈是 token 窗口不是数字：<code>MAX_INPUT_LEN=2048</code>，一条规则约 100-150 tokens、文案+system 约 500，留给规则只剩约 1500，最多装 10-12 条。top-10 已是极限。要加大得先把上下文窗口打开，但即便打开，抖音/视频号 100 多条规则，RAG 的天花板也远低于 per-category。</p>
+<p>这一段的结论不是”选哪个更好”，而是认清没有银弹——最后是按平台规则结构做混合（公众号只能 RAG，因为 53 条放不进 per-category 的单类）。</p>
+<h2 id="最隐蔽的-bug模型在背答案不是在读题"><a class="not-prose" href="#最隐蔽的-bug模型在背答案不是在读题">最隐蔽的 bug：模型在背答案，不是在读题</a></h2>
+<p>四个平台里视频号最反常——规则 Recall 一度 <strong>0%</strong>。</p>
+<p>我第一反应是”标题格式不匹配”，还列了张表说”训练数据、规则库、验证集引用了三个不同文档”。然后我强迫自己重查——<strong>不靠采样，把来源全列出来比对</strong>——发现我第一版结论是错的：文档名其实大同小异，归一化还会把前缀剥掉，不该导致 0%。</p>
+<p>去看模型的<strong>实际预测</strong>，真相才出来：模型<strong>认对了违规类型</strong>（它知道这是赌博内容），但输出的条目编号完全对不上。原因在训练数据——同一个”赌博”违规，被打上了来自 4 个不同文档的冲突标题：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>训练出现次数</th><th>标题</th></tr></thead><tbody><tr><td>20 次</td><td>「发布违禁信息」细则-第七条 赌博</td></tr><tr><td>20 次</td><td>禁止发布的营销信息列表-第五条 赌博、赌博工具</td></tr><tr><td>13 次</td><td>橱窗带货规则总则-第八条 传销诈骗赌博</td></tr><tr><td>10 次</td><td>直播行为规范-第二条 淫秽、色情、赌博</td></tr></tbody></table>
+<p>模型学到的不是”从 prompt 里复制标题”，而是”赌博 → 从记忆里随机吐这 4 个之一”。推理时给它看”第五条”，它从记忆里掏出”第八条”，于是 0% 命中。</p>
+<p><strong>这是一个数据标注问题，伪装成了模型召回问题。</strong> 它在指标上长得像”模型漏了”，实际上模型没漏，是被训练数据教成了背答案。小红书是一对一标题所以加前缀就好，视频号是一对多所以加前缀没用。修法两条：治本是统一训练标签重训，止血是后处理用相似度把模型输出映射回规则库的标准标题。</p>
+<p>（顺带一个同源的坑：AI 治理类别疯狂误报，追下去是训练数据污染——小红书 AI 类别 566 条样本里 23.9% 的文案跟 AI 无关却塞进了 AI 的 system prompt。又是数据问题。）</p>
+<h2 id="越改越糟一次灾难性的重训"><a class="not-prose" href="#越改越糟一次灾难性的重训">越改越糟：一次灾难性的重训</a></h2>
+<p>中间试过一条结构性重构 exp_007——把任务改成”一次只判一条规则、输出是/否”配 RAG，16056 条数据训出来。结果失败：RAG 召回只有 5-35%，正确规则根本没进模型视野，学的东西和最终推理对不上。</p>
+<p>后来上 Hard Negative（system prompt 里同时放正确规则 + 2-3 条相似但不正确的规则，逼模型学辨别）做 exp_009，目标冲 90%。结果<strong>平均 Recall 从 79.6% 暴跌到 46%</strong>——灾难性倒退。诊断是 HardNeg 数据生成有 bug + 多训了一轮让模型整体能力退化。方向没错（模型的毛病确实是”过度预测”，该让它更保守），但数据有毒，反而搞砸。</p>
+<p>最后准备了一个 5 分钟回滚脚本，退回上一版稳定模型（exp_008，最终用 AWQ INT4 量化到约 10GB 跑在 24G 卡上）。<strong>这件事的教训是：每次重训都不是免费的（4096 cutoff 让吞吐慢约 7 倍、一轮近 3 小时），冲新高之前先把能回退的基线钉死。</strong></p>
+<h2 id="溯源率到底是多少29-还是-96"><a class="not-prose" href="#溯源率到底是多少29-还是-96">溯源率到底是多少：29% 还是 96%</a></h2>
+<p>这是整个项目最该讲的一段。冲到后期，“溯源率”这个数字本身开始崩塌——因为它取决于你怎么定义。同一个模型，我算出过这些：</p>
 
 
 
@@ -122,40 +215,22 @@
 
 
 
-
-
-
-
-
-
-
-
-<table><thead><tr><th>平台</th><th>规则数</th><th>category 数</th><th>每批最多规则</th><th>prompt 量级</th><th>状态</th></tr></thead><tbody><tr><td>小红书</td><td>49</td><td>14</td><td>6 条</td><td>短</td><td>正常</td></tr><tr><td>抖音</td><td>107</td><td>21</td><td>10 条</td><td>短</td><td>正常</td></tr><tr><td>视频号</td><td>135</td><td>11</td><td>18 条</td><td>最大一组 3438 tokens</td><td>基本正常</td></tr><tr><td><strong>公众号</strong></td><td><strong>53</strong></td><td><strong>1</strong></td><td><strong>53 条</strong></td><td><strong>11505 tokens</strong></td><td>根本问题</td></tr></tbody></table>
-<p>差别一目了然：别的平台规则分成了十几个 category，每次推理只装一个 category 的几条规则，prompt 很短；<strong>公众号的 53 条规则在数据源头就只挂在一个 category 下</strong>，没有子分组，于是”按类别推理”退化成”把 53 条全塞进一个 prompt”，直接 11505 tokens。</p>
-<p>为了确认这不是本地代码的问题，我连进了生产环境的 Milvus 向量库去核对——公众号在生产库里同样是 53 条全在一个 category 下，和本地一致。<strong>所以这是数据从源头就缺了一层分类结构，不是推理代码写错了。</strong> 其他三个平台的架构完全没问题。</p>
-<h2 id="修复以及它的诚实边界"><a class="not-prose" href="#修复以及它的诚实边界">修复，以及它的诚实边界</a></h2>
-<p>两条路：</p>
+<table><thead><tr><th>口径</th><th>数字</th></tr></thead><tbody><tr><td>exact match（一条不错不漏）</td><td>33%</td></tr><tr><td>严格 per-rule（以独立审核为准、按违规条数）</td><td><strong>28.87%</strong></td></tr><tr><td>per-rule Recall（micro）</td><td>51-77%</td></tr><tr><td>sample-level any-match（每条抓到≥1条算对）</td><td>65%</td></tr><tr><td>“混合准确率”（合规判对 + 违规命中加权）</td><td>85-95%</td></tr><tr><td>mini eval（200 条明显违规的样本）</td><td>88.5%</td></tr><tr><td>self-check（把模型自己的预测当标准答案重跑）</td><td><strong>94.9-96%</strong></td></tr></tbody></table>
+<p>29% 和 96% 是同一个模型。差别全在口径：</p>
 <ul>
-<li><strong>路线 A（不重训）</strong>：手动把 53 条规则按主题分成 6–8 组，推理时按组跑、合并。能解决，但现有模型没见过这种分组格式。</li>
-<li><strong>路线 B（重训 exp_006）</strong>：给公众号规则加主题分组、把 cutoff 从 1024 提到 4096、重新生成训练数据、重训。</li>
+<li><strong>28.87%</strong> 是最严的——以独立审核为标准答案、按每一条违规算。拆开看，1113 个违规样本里至少抓到一条的有 65%，完美的只有 16%，全漏的 35%。而多数”漏”其实是”等价规则不同条号”（同一个违规，规则库里有好几条意思相近的，模型指了相近的那条）。</li>
+<li><strong>96%</strong> 是 self-check：把模型自己的预测当成标准答案，再跑一遍看一致不一致。它衡量的是<strong>可复现性</strong>，不是质量。一个模型跟自己比，当然高。</li>
 </ul>
-<p>选了 B，但要说清楚它的边界——<strong>4096 也装不下公众号的 11505 tokens</strong>。提到 4096 的真实意义不是”一次装下所有规则”，而是把公众号从”截断到 1024、只看到约 3 条规则、梯度≈0”，变成”截断到 4096、能看到约 14 条规则、有真实梯度”。公众号推理时仍然要分 3–4 批（每批约 15 条）跑完再合并。</p>
-<p>所以 exp_006 实际解决了三件事，且程度不同：</p>
-<ol>
-<li>抖音/视频号的训练截断——<strong>完整修复</strong>（4096 能装下它们最大的 category，视频号最大一组 3438 tokens 刚好够）；</li>
-<li>公众号训练梯度从零变有效——<strong>部分修复</strong>；</li>
-<li>公众号推理的分批策略——训练之外还得单独实现。</li>
-</ol>
-<p>代价也真实：4096 cutoff 下吞吐从 exp_005 的 15 samples/s 掉到 2.03 samples/s，<strong>慢约 7 倍</strong>，整轮训练 2 小时 48 分（ZeRO-2 扛住 4096，显存 37283/49140 MiB，没 OOM）。</p>
-<p>更重要的是那句没法绕过的话：<strong>一个数据结构缺失的问题，没法纯靠训练补回来。</strong> 重训能让梯度有效、让 loss 变真实，但公众号”53 条挤一个 category”这个结构问题，最终得在数据侧补上分组才算真解。</p>
-<h2 id="留下的几条习惯"><a class="not-prose" href="#留下的几条习惯">留下的几条习惯</a></h2>
+<p>这里有个我必须记下来的诚实瞬间。冲指标的压力下，我一度想用对自己有利的口径去凑 90%。但越算越清楚那是自欺：<strong>90% 是把口径选到最松、甚至拿 self-check 注水才出来的，真实能力在 70-78%。</strong> 评估报告里我最后写的是”24G 硬件 + 现有数据，工程天花板约 75-78%，到不了 90%”。</p>
+<p>对外该报的不是那个最好看的 90%，是<strong>88.5%（明显违规子集）/ 单平台最高 92.1% / 严格口径 70-78%</strong>，并说清每个数字的口径。一个溯源率，如果不写清楚”按什么算的”，就是个能从 29 滑到 96 的橡皮筋。</p>
+<h2 id="这个项目教给我的"><a class="not-prose" href="#这个项目教给我的">这个项目教给我的</a></h2>
 <ul>
-<li><strong>异常好的 loss 先查 mask 和截断</strong>。低 loss 可能只是因为算的 token 少、被截掉的 token 没进损失。不同截断/掩码下的 loss 不可直接比较。</li>
-<li><strong>高指标先核对模型的真实输入</strong>。padding 方向、截断方向、上下文有没有被砍，决定了这个数字到底在衡量什么。<code>padding_side="left"</code> + 去头保尾，能让一个没读到规则的模型照样吐合法 JSON、照样”准确”。</li>
-<li><strong>线上差、指标好，去比训练分布和推理分布</strong>。训练每次 1 个 category，推理一次 53 条，这种 train-serve skew 不体现在 loss 上、也不体现在同分布评估上，只在真实使用时暴露。</li>
-<li><strong>指标异常时，顺着输入一路查到数据源</strong>。这次的终点不是某个超参，是生产库里”公众号只有 1 个 category”。很多看起来像模型的问题，根子在数据结构。</li>
+<li><strong>没有单一指标可信，要顺着输入查到数据</strong>。loss 低可能是被截断算小的；准确率高可能是评估格式喂错、模型在陌生分布上蒙的；“0% 召回”可能根本是训练标签冲突让模型背答案；“96% 溯源”可能是拿模型自己当标准答案。每个异常指标，都要追到模型实际看到/学到了什么。</li>
+<li><strong>自己的第一个分析也会骗你</strong>。视频号那次我第一版”三个文档”的结论是错的，靠采样得来的。列全量、看实际预测，才挖到真因。下结论前问一句：这是我看到的，还是我以为的？</li>
+<li><strong>冲新高前先钉死可回退的基线</strong>。exp_009 一把把 79.6% 干到 46%，幸亏有 5 分钟回滚。重训不免费，激进实验要有退路。</li>
+<li><strong>指标的口径就是诚实本身</strong>。最该警惕的不是低指标，是那个你为了好看而悄悄选松的口径。把口径写清楚，比把数字做高更重要——这条不只是工程问题，是要不要骗人的问题。</li>
 </ul>
-<p>微调里最危险的从来不是会报错的地方——那些你迟早会修。危险的是这些看起来一切正常、却在悄悄骗你的数字。</p>  </div> </div> </article> <button class="hover:border-link fixed end-4 bottom-8 z-90 flex h-10 w-10 translate-y-28 cursor-pointer items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all transition-discrete duration-300 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 sm:end-8 sm:h-12 sm:w-12 dark:bg-zinc-700" data-show="false" id="to-top-btn"> <span class="sr-only">Back to top</span> <svg aria-hidden="true" class="h-6 w-6" fill="none" focusable="false" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </button>  </main> <footer class="text-muted mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">
+<p>这个模型最难的从来不是”判得出违规”，而是”指得准是哪一条、并且老实说清楚指得有多准”。挡在 90% 前面的，多数时候不是模型不够强，是数据没干净、指标在骗人、口径在放水。</p>  </div> </div> </article> <button class="hover:border-link fixed end-4 bottom-8 z-90 flex h-10 w-10 translate-y-28 cursor-pointer items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all transition-discrete duration-300 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 sm:end-8 sm:h-12 sm:w-12 dark:bg-zinc-700" data-show="false" id="to-top-btn"> <span class="sr-only">Back to top</span> <svg aria-hidden="true" class="h-6 w-6" fill="none" focusable="false" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </button>  </main> <footer class="text-muted mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">
 &copy; tlj 2026.<span class="inline-block">&nbsp;🚀&nbsp;tlj 的工程笔记&nbsp;🌵&nbsp;</span> </div> <nav aria-labelledby="footer_links" class="sm:divide-muted flex gap-x-2 sm:gap-x-0 sm:divide-x"> <p id="footer_links" class="sr-only">More on this site</p> <a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/"> 首页 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/projects/"> 项目 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/posts/"> 博客 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/about/"> 关于 </a> </nav> </footer> <script type="speculationrules">
 			{
 				"prefetch": [

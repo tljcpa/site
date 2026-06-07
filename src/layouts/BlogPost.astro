@@ -5,6 +5,7 @@ import Masthead from "@/components/blog/Masthead.astro";
 import TOC from "@/components/blog/TOC.astro";
 
 import BaseLayout from "./Base.astro";
+import SuggestionLayer from "@/components/SuggestionLayer.astro";
 
 interface Props {
 	post: CollectionEntry<"post">;
@@ -56,6 +57,7 @@ const readingTime: string = remarkPluginFrontmatter.readingTime;
 			<path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
 		</svg>
 	</button>
+	<SuggestionLayer />
 </BaseLayout>
 
 <script>

@@ -1,0 +1,308 @@
+---
+// 访客建议浮层。挂在文章页和项目页的正文区。
+// 纯客户端原生 JS，调 Cloudflare Worker 后端。隐私模型见后端 src/index.js。
+---
+
+<div id="sugg-root" data-api="https://blog-suggestions.zdwktlj.workers.dev"></div>
+
+<style is:global>
+	.sugg-mark {
+		background: #fde68a;
+		border-radius: 2px;
+		padding: 0 1px;
+		cursor: help;
+	}
+	html.dark .sugg-mark { background: #92731a; color: #fff; }
+
+	#sugg-fab {
+		position: fixed; z-index: 95; display: none;
+		padding: 6px 12px; font-size: 13px; line-height: 1;
+		background: #2563eb; color: #fff; border: none; border-radius: 6px;
+		cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+	}
+	#sugg-fab:hover { background: #1d4ed8; }
+
+	.sugg-modal-bg {
+		position: fixed; inset: 0; z-index: 100; display: none;
+		align-items: center; justify-content: center;
+		background: rgba(0,0,0,.45);
+	}
+	.sugg-modal-bg.open { display: flex; }
+	.sugg-modal {
+		width: min(92vw, 460px); background: #fff; color: #18181b;
+		border-radius: 10px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,.3);
+	}
+	html.dark .sugg-modal { background: #27272a; color: #e4e4e7; }
+	.sugg-modal h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+	.sugg-quote {
+		font-size: 13px; color: #71717a; border-inline-start: 3px solid #d4d4d8;
+		padding-inline-start: 8px; margin: 0 0 10px; max-height: 96px; overflow: auto;
+	}
+	.sugg-modal textarea {
+		width: 100%; min-height: 90px; box-sizing: border-box; resize: vertical;
+		padding: 8px; font-size: 14px; border: 1px solid #d4d4d8; border-radius: 6px;
+		background: transparent; color: inherit; font-family: inherit;
+	}
+	.sugg-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+	.sugg-btn {
+		padding: 7px 14px; font-size: 13px; border-radius: 6px; cursor: pointer; border: none;
+	}
+	.sugg-btn-primary { background: #2563eb; color: #fff; }
+	.sugg-btn-ghost { background: transparent; color: #71717a; border: 1px solid #d4d4d8; }
+	.sugg-toast {
+		position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+		z-index: 110; background: #18181b; color: #fff; padding: 8px 16px;
+		border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .25s;
+		pointer-events: none;
+	}
+	.sugg-toast.show { opacity: 1; }
+
+	#sugg-mine {
+		margin-top: 40px; padding-top: 20px; border-top: 1px dashed #d4d4d8;
+		font-size: 14px;
+	}
+	#sugg-mine h3 { font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+	#sugg-mine .hint { color: #71717a; font-size: 12px; margin: 0 0 12px; }
+	.sugg-item {
+		padding: 10px 0; border-bottom: 1px solid #e4e4e7; display: flex;
+		gap: 10px; justify-content: space-between; align-items: flex-start;
+	}
+	html.dark .sugg-item { border-color: #3f3f46; }
+	.sugg-item .q { color: #a16207; font-size: 12px; }
+	html.dark .sugg-item .q { color: #fbbf24; }
+	.sugg-item .c { margin-top: 2px; }
+	.sugg-item .meta { color: #a1a1aa; font-size: 11px; margin-top: 2px; }
+	.sugg-del {
+		flex: none; background: none; border: none; color: #ef4444; cursor: pointer;
+		font-size: 12px; padding: 2px 4px;
+	}
+	.sugg-open-btn {
+		margin-top: 12px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+		background: transparent; border: 1px solid #2563eb; color: #2563eb; border-radius: 6px;
+	}
+
+	#sugg-admin {
+		position: fixed; top: 0; right: 0; bottom: 0; z-index: 120; width: min(94vw, 520px);
+		background: #fff; color: #18181b; box-shadow: -4px 0 24px rgba(0,0,0,.25);
+		display: none; flex-direction: column; padding: 16px; overflow: auto;
+	}
+	html.dark #sugg-admin { background: #1c1c1f; color: #e4e4e7; }
+	#sugg-admin.open { display: flex; }
+	#sugg-admin h3 { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+</style>
+
+<script>
+	(function () {
+		if (window.__suggInit) return;
+		const prose = document.querySelector(".prose");
+		const root = document.getElementById("sugg-root");
+		if (!prose || !root) return;
+		window.__suggInit = true;
+
+		const API = root.dataset.api;
+		const slug = (location.pathname.replace(/\/+$/, "") || "/");
+
+		// 访客匿名 token：存浏览器本地，换设备/清缓存会丢（不登录的固有代价）
+		let token = localStorage.getItem("sugg_token");
+		if (!token || token.length < 16) {
+			token = "v_" + (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : Math.random().toString(36).slice(2) + Date.now().toString(36));
+			localStorage.setItem("sugg_token", token);
+		}
+
+		// ---- DOM 搭建 ----
+		const fab = document.createElement("button");
+		fab.id = "sugg-fab";
+		fab.textContent = "提建议";
+		document.body.appendChild(fab);
+
+		const modalBg = document.createElement("div");
+		modalBg.className = "sugg-modal-bg";
+		modalBg.innerHTML =
+			'<div class="sugg-modal">' +
+			'<h3>提个建议</h3>' +
+			'<blockquote class="sugg-quote" id="sugg-mq"></blockquote>' +
+			'<textarea id="sugg-mt" placeholder="写下你的建议、疑问或划线想说的话…"></textarea>' +
+			'<div class="sugg-row">' +
+			'<button class="sugg-btn sugg-btn-ghost" id="sugg-cancel">取消</button>' +
+			'<button class="sugg-btn sugg-btn-primary" id="sugg-send">提交</button>' +
+			'</div></div>';
+		document.body.appendChild(modalBg);
+
+		const toast = document.createElement("div");
+		toast.className = "sugg-toast";
+		document.body.appendChild(toast);
+
+		const mine = document.createElement("div");
+		mine.id = "sugg-mine";
+		prose.insertAdjacentElement("afterend", mine);
+
+		const mq = modalBg.querySelector("#sugg-mq");
+		const mt = modalBg.querySelector("#sugg-mt");
+		let pendingQuote = "";
+
+		function showToast(msg) {
+			toast.textContent = msg;
+			toast.classList.add("show");
+			setTimeout(() => toast.classList.remove("show"), 1800);
+		}
+		function openModal(quote) {
+			pendingQuote = quote || "";
+			if (pendingQuote) { mq.textContent = pendingQuote; mq.style.display = ""; }
+			else { mq.style.display = "none"; }
+			mt.value = "";
+			modalBg.classList.add("open");
+			mt.focus();
+		}
+		function closeModal() { modalBg.classList.remove("open"); }
+
+		// ---- 选区浮动按钮 ----
+		let fabRange = null;
+		document.addEventListener("mouseup", () => {
+			setTimeout(() => {
+				const sel = window.getSelection();
+				const text = sel ? sel.toString().trim() : "";
+				if (text && text.length >= 2 && text.length <= 600 && sel.anchorNode && prose.contains(sel.anchorNode)) {
+					fabRange = text;
+					const r = sel.getRangeAt(0).getBoundingClientRect();
+					fab.style.display = "block";
+					fab.style.top = (r.top - 38) + "px";
+					fab.style.left = Math.max(8, r.left + r.width / 2 - 30) + "px";
+				} else if (!modalBg.classList.contains("open")) {
+					fab.style.display = "none";
+				}
+			}, 10);
+		});
+		fab.addEventListener("mousedown", (e) => e.preventDefault());
+		fab.addEventListener("click", () => { fab.style.display = "none"; openModal(fabRange); });
+
+		modalBg.querySelector("#sugg-cancel").addEventListener("click", closeModal);
+		modalBg.addEventListener("click", (e) => { if (e.target === modalBg) closeModal(); });
+		modalBg.querySelector("#sugg-send").addEventListener("click", send);
+
+		async function send() {
+			const comment = mt.value.trim();
+			if (!comment) { showToast("建议不能为空"); return; }
+			try {
+				const r = await fetch(API + "/suggestions", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ token, slug, quote: pendingQuote, comment }),
+				});
+				if (!r.ok) { showToast("提交失败（" + r.status + "）"); return; }
+				closeModal();
+				showToast("已提交，只有你和博主能看到");
+				loadMine();
+			} catch (e) { showToast("网络错误"); }
+		}
+
+		// ---- 高亮我提过建议的段落 ----
+		function highlight(quote, comment) {
+			if (!quote) return;
+			const walker = document.createTreeWalker(prose, NodeFilter.SHOW_TEXT, null);
+			let node;
+			while ((node = walker.nextNode())) {
+				const idx = node.nodeValue.indexOf(quote);
+				if (idx >= 0 && node.parentElement && !node.parentElement.classList.contains("sugg-mark")) {
+					try {
+						const range = document.createRange();
+						range.setStart(node, idx);
+						range.setEnd(node, idx + quote.length);
+						const mark = document.createElement("mark");
+						mark.className = "sugg-mark";
+						mark.title = comment;
+						range.surroundContents(mark);
+					} catch (e) {}
+					return;
+				}
+			}
+		}
+
+		function fmtTime(ms) {
+			try { return new Date(ms).toLocaleString("zh-CN", { hour12: false }); }
+			catch (e) { return ""; }
+		}
+
+		// ---- 我的建议列表 ----
+		async function loadMine() {
+			let items = [];
+			try {
+				const r = await fetch(API + "/suggestions?slug=" + encodeURIComponent(slug) + "&token=" + encodeURIComponent(token));
+				const d = await r.json();
+				items = d.items || [];
+			} catch (e) {}
+			renderMine(items);
+			items.forEach((it) => highlight(it.quote, it.comment));
+		}
+		function renderMine(items) {
+			let html = "<h3>我提过的建议</h3>";
+			html += '<p class="hint">只有你（这台设备）和博主能看到。换设备或清缓存后看不到历史，但博主仍收得到。</p>';
+			items.forEach((it) => {
+				html += '<div class="sugg-item" data-id="' + it.id + '"><div>';
+				if (it.quote) html += '<div class="q">「' + esc(it.quote) + "」</div>";
+				html += '<div class="c">' + esc(it.comment) + "</div>";
+				html += '<div class="meta">' + fmtTime(it.created_at) + "</div>";
+				html += '</div><button class="sugg-del">删除</button></div>';
+			});
+			html += '<button class="sugg-open-btn" id="sugg-open">对这篇整体提个建议</button>';
+			mine.innerHTML = html;
+			mine.querySelector("#sugg-open").addEventListener("click", () => openModal(""));
+			mine.querySelectorAll(".sugg-del").forEach((b) => {
+				b.addEventListener("click", async () => {
+					const id = b.closest(".sugg-item").dataset.id;
+					try {
+						await fetch(API + "/suggestions/" + id + "?token=" + encodeURIComponent(token), { method: "DELETE" });
+						loadMine();
+					} catch (e) {}
+				});
+			});
+		}
+		function esc(s) {
+			return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+		}
+
+		// ---- 管理面板（#admin）----
+		const adminPanel = document.createElement("div");
+		adminPanel.id = "sugg-admin";
+		document.body.appendChild(adminPanel);
+		async function openAdmin() {
+			let key = localStorage.getItem("sugg_admin_key");
+			if (!key) {
+				key = prompt("输入管理密钥（只你知道）");
+				if (!key) return;
+				localStorage.setItem("sugg_admin_key", key);
+			}
+			let data;
+			try {
+				const r = await fetch(API + "/suggestions", { headers: { "X-Admin-Key": key } });
+				data = await r.json();
+			} catch (e) { alert("网络错误"); return; }
+			if (!data || !data.admin) {
+				localStorage.removeItem("sugg_admin_key");
+				alert("密钥错误");
+				return;
+			}
+			let html = '<h3>全部访客建议（' + (data.items || []).length + "）</h3>";
+			(data.items || []).forEach((it) => {
+				html += '<div class="sugg-item" data-id="' + it.id + '"><div>';
+				html += '<div class="meta">' + esc(it.slug) + " · 访客 " + esc(String(it.token).slice(0, 8)) + " · " + fmtTime(it.created_at) + "</div>";
+				if (it.quote) html += '<div class="q">「' + esc(it.quote) + "」</div>";
+				html += '<div class="c">' + esc(it.comment) + "</div>";
+				html += '</div><button class="sugg-del">删除</button></div>';
+			});
+			adminPanel.innerHTML = html;
+			adminPanel.classList.add("open");
+			adminPanel.querySelectorAll(".sugg-del").forEach((b) => {
+				b.addEventListener("click", async () => {
+					const id = b.closest(".sugg-item").dataset.id;
+					await fetch(API + "/suggestions/" + id, { method: "DELETE", headers: { "X-Admin-Key": key } });
+					openAdmin();
+				});
+			});
+		}
+		if (location.hash === "#admin") openAdmin();
+		window.addEventListener("hashchange", () => { if (location.hash === "#admin") openAdmin(); });
+
+		// 初次加载
+		loadMine();
+	})();
+</script>

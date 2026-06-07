@@ -7,11 +7,10 @@ role: "独立开发（审查引擎 / 前端 / 部署）"
 period: "2026-06"
 highlight: "deepseek-chat 扫候选 + deepseek-reasoner 逐条确认 + Azure 高危交叉验证；正确 PR 0 误报"
 stack: ["FastAPI", "DeepSeek", "Azure GPT-4.1-mini", "React", "Docker"]
-repoUrl: "https://github.com/tljcpa/qiniu-pr-review"
 weight: 68
 ---
 
-七牛云实训营的题目三。给一个 GitHub PR，自动审查代码、列出问题。这类工具最容易翻车的不是漏报，而是乱报——对一段没问题的代码硬挑一堆假问题，开发者看两次就不信了。所以我把整个设计的重心放在**误报控制**上，并且用真实 PR 把它测出来。
+一次暑期编程实训营的赛题（题目三）。给一个 GitHub PR，自动审查代码、列出问题。这类工具最容易翻车的不是漏报，而是乱报——对一段没问题的代码硬挑一堆假问题，开发者看两次就不信了。所以我把整个设计的重心放在**误报控制**上，并且用真实 PR 把它测出来。
 
 ## 两段式模型路由：扫和判用不同的模型
 

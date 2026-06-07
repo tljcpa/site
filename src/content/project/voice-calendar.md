@@ -9,6 +9,7 @@ highlight: "自写中文时间解析三层兜底引擎，推翻 BRIEF 预设的 
 stack: ["FastAPI", "Azure Speech", "DeepSeek", "SQLAlchemy", "Docker", "pytest"]
 repoUrl: "https://github.com/tljcpa/qiniu-voice-calendar"
 weight: 80
+featured: true
 ---
 
 七牛云实训营的题目一。用户口述"明天下午三点三刻提醒我开会"，系统转成结构化日程并入库，还能检测冲突、多轮澄清。一句口语要走完"语音转文字 → 意图识别 → 时间解析 → 冲突检测 → 入库 → 前端联动"才算数。

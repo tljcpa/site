@@ -8,6 +8,7 @@ period: "2026-06"
 highlight: "行级双向溯源（LLM 抄 marker、代码定位）+ 有序判别联合 schema + story_bible 单一事实源；103 单测、32 PR"
 stack: ["FastAPI", "pydantic", "YAML Schema", "React", "DeepSeek"]
 weight: 67
+featured: true
 ---
 
 七牛云实训营的题目三：把一部小说（3 章以上）自动转成**可机读、可手改、可溯源、可重渲染**的结构化剧本（主格式 YAML，另出 Fountain / PDF）。定位是"编剧工作台"，不是"切块丢给大模型的转换器"。

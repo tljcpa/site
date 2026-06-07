@@ -8,6 +8,8 @@ period: "2026-06"
 highlight: "QLoRA 微调后 loss 2.087→1.428（↓31%），7.28GB 显存跑通；7 个真实坑，含 FSDP 版本坑与 SDPA shape bug 的诊断心法"
 stack: ["Qwen2-VL-2B", "QLoRA", "ms-swift", "Azure GPT-4.1-mini", "RTX 4090"]
 weight: 62
+series: driving
+featured: true
 ---
 
 > 这是一个迷你复现：50 条样本、AI 辅助完成，目的是验证技术路线可行，不代表产品级能力。它证明了"路线能跑通"，**没有**证明模型真的看懂了场景——这条诚实声明是项目的一部分。

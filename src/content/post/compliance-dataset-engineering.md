@@ -4,6 +4,7 @@ description: "接手一个内容合规模型时，前一版数据集的标题九
 publishDate: "2026-04-25"
 tags: ["数据工程", "大模型微调", "合规"]
 pinned: true
+series: compliance
 ---
 
 这是我实习里那个内容合规模型项目（[微调与评估那条线在这里](/posts/finetune-misleading-metrics/)）的前半段——造数据。模型再好，喂的数据是脏的也白搭，而这个项目早期最大的工作量恰恰在数据集上。这篇单独讲这一段，因为给微调造数据这件事，远比"调个 API 生成一批"难。

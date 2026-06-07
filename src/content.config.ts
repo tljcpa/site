@@ -75,7 +75,7 @@ const project = defineCollection({
 			// 我在项目里的角色/定位
 			role: z.string().optional(),
 			// 项目类型
-			kind: z.enum(["个人", "比赛", "面试作品", "学习", "开源复现"]).default("个人"),
+			kind: z.enum(["个人", "比赛", "面试作品", "实习", "学习", "开源复现"]).default("个人"),
 			// 一句话成果
 			highlight: z.string().optional(),
 			// 外链(仓库/demo),脱敏后可能为空

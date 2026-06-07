@@ -59,6 +59,23 @@ const { data } = project;
 				</ul>
 			)
 		}
+
+		{
+			(data.repoUrl || data.demoUrl) && (
+				<div class="mt-4 flex flex-wrap gap-4 text-sm">
+					{data.repoUrl && (
+						<a class="text-accent hover:underline" href={data.repoUrl} target="_blank" rel="noreferrer">
+							GitHub 仓库 &rarr;
+						</a>
+					)}
+					{data.demoUrl && (
+						<a class="text-accent hover:underline" href={data.demoUrl} target="_blank" rel="noreferrer">
+							在线演示 &rarr;
+						</a>
+					)}
+				</div>
+			)
+		}
 	</header>
 
 	<article class="prose prose-cactus max-w-none">

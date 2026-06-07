@@ -1,0 +1,159 @@
+---
+// 页面统计:浏览打点(来源/渠道/城市级地理,隐私友好不存 IP)+ 浏览量/点赞显示 + #stats 管理分析面板。
+// 复用 SuggestionLayer 的访客 token 与 admin key。
+---
+
+<div id="page-stats" data-api="https://blog-suggestions.zdwktlj.workers.dev"></div>
+
+<style is:global>
+	.stats-bar {
+		display: flex; align-items: center; gap: 16px; margin: 18px 0 0;
+		font-size: 13px; color: #71717a;
+	}
+	.stats-bar .pv { display: inline-flex; align-items: center; gap: 5px; }
+	.stats-like {
+		display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+		border: 1px solid #d4d4d8; background: transparent; color: inherit;
+		border-radius: 999px; padding: 3px 12px; font-size: 13px; transition: all .15s;
+	}
+	.stats-like:hover { border-color: #ef4444; color: #ef4444; }
+	.stats-like.liked { border-color: #ef4444; color: #ef4444; background: #ef444415; }
+
+	#stats-panel {
+		position: fixed; top: 0; right: 0; bottom: 0; z-index: 120; width: min(94vw, 560px);
+		background: #fff; color: #18181b; box-shadow: -4px 0 24px rgba(0,0,0,.25);
+		display: none; flex-direction: column; padding: 16px; overflow: auto; font-size: 13px;
+	}
+	html.dark #stats-panel { background: #1c1c1f; color: #e4e4e7; }
+	#stats-panel.open { display: flex; }
+	#stats-panel h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+	#stats-panel h4 { margin: 16px 0 6px; font-size: 13px; font-weight: 600; color: #2563eb; }
+	#stats-panel table { width: 100%; border-collapse: collapse; }
+	#stats-panel td { padding: 3px 4px; border-bottom: 1px solid #e4e4e7; vertical-align: top; }
+	html.dark #stats-panel td { border-color: #3f3f46; }
+	#stats-panel td.n { text-align: right; color: #71717a; white-space: nowrap; }
+	#stats-panel .close { align-self: flex-end; cursor: pointer; border: none; background: none; color: #71717a; font-size: 20px; }
+</style>
+
+<script>
+	(function () {
+		if (window.__pageStatsInit) return;
+		window.__pageStatsInit = true;
+		const root = document.getElementById("page-stats");
+		if (!root) return;
+		const API = root.dataset.api;
+		const slug = location.pathname.replace(/\/+$/, "") || "/";
+
+		// 复用访客 token
+		let token = localStorage.getItem("sugg_token");
+		if (!token || token.length < 16) {
+			token = "v_" + (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : Math.random().toString(36).slice(2) + Date.now().toString(36));
+			localStorage.setItem("sugg_token", token);
+		}
+
+		// 渠道来源:首次带 ?from= 进来就记住(投简历/发链接用)
+		const urlFrom = new URLSearchParams(location.search).get("from");
+		if (urlFrom) localStorage.setItem("sugg_from", urlFrom.slice(0, 100));
+		const source = urlFrom || localStorage.getItem("sugg_from") || "";
+
+		// 打点(同一标签页同一页 30 分钟内不重复计,避免刷新灌水)
+		const pvKey = "pv_" + slug;
+		const last = Number(sessionStorage.getItem(pvKey) || 0);
+		const nowSession = performance.timeOrigin + performance.now();
+		if (nowSession - last > 30 * 60 * 1000) {
+			sessionStorage.setItem(pvKey, String(nowSession));
+			fetch(API + "/pageview", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ slug, referrer: document.referrer || "", source }),
+			}).catch(() => {});
+		}
+
+		// 浏览量 + 点赞条(仅正文页显示)
+		const prose = document.querySelector(".prose");
+		if (prose) {
+			const bar = document.createElement("div");
+			bar.className = "stats-bar";
+			bar.innerHTML =
+				'<span class="pv">👁 <span id="pv-n">…</span></span>' +
+				'<button class="stats-like" id="like-btn">♥ <span id="like-n">…</span></button>';
+			prose.insertAdjacentElement("afterend", bar);
+
+			fetch(API + "/pageview?slug=" + encodeURIComponent(slug))
+				.then((r) => r.json())
+				.then((d) => { document.getElementById("pv-n").textContent = d.count ?? 0; })
+				.catch(() => {});
+
+			const likeBtn = document.getElementById("like-btn");
+			const likeN = document.getElementById("like-n");
+			let liked = false;
+			function renderLike(d) {
+				liked = Boolean(d.liked);
+				likeN.textContent = d.count ?? 0;
+				likeBtn.classList.toggle("liked", liked);
+			}
+			fetch(API + "/like?slug=" + encodeURIComponent(slug) + "&token=" + encodeURIComponent(token))
+				.then((r) => r.json()).then(renderLike).catch(() => {});
+			likeBtn.addEventListener("click", () => {
+				const method = liked ? "DELETE" : "POST";
+				const opts = liked
+					? { method: "DELETE" }
+					: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, token }) };
+				const u = liked
+					? API + "/like?slug=" + encodeURIComponent(slug) + "&token=" + encodeURIComponent(token)
+					: API + "/like";
+				fetch(u, opts).then((r) => r.json()).then(renderLike).catch(() => {});
+			});
+		}
+
+		// 管理分析面板(#stats)
+		const panel = document.createElement("div");
+		panel.id = "stats-panel";
+		document.body.appendChild(panel);
+		function esc(s) {
+			return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+		}
+		function fmtTime(ms) {
+			try { return new Date(ms).toLocaleString("zh-CN", { hour12: false }); } catch (e) { return ""; }
+		}
+		function table(rows, cols) {
+			if (!rows || !rows.length) return '<p style="color:#a1a1aa">（暂无）</p>';
+			let h = "<table>";
+			rows.forEach((r) => {
+				h += "<tr>";
+				cols.forEach((c) => {
+					h += c.n ? '<td class="n">' + esc(r[c.k] ?? "") + "</td>" : "<td>" + esc(r[c.k] ?? "—") + "</td>";
+				});
+				h += "</tr>";
+			});
+			return h + "</table>";
+		}
+		async function openStats() {
+			let key = localStorage.getItem("sugg_admin_key");
+			if (!key) {
+				key = prompt("输入管理密钥");
+				if (!key) return;
+				localStorage.setItem("sugg_admin_key", key);
+			}
+			let d;
+			try {
+				const r = await fetch(API + "/analytics", { headers: { "X-Admin-Key": key } });
+				if (r.status === 403) { localStorage.removeItem("sugg_admin_key"); alert("密钥错误"); return; }
+				d = await r.json();
+			} catch (e) { alert("网络错误"); return; }
+			panel.innerHTML =
+				'<button class="close" id="stats-close">×</button>' +
+				"<h3>访问分析 · 总浏览 " + (d.totalPV ?? 0) + "</h3>" +
+				"<h4>渠道来源（?from=，投简历最该看这个）</h4>" + table(d.bySource, [{ k: "source" }, { k: "n", n: 1 }]) +
+				"<h4>来源网站（referrer）</h4>" + table(d.byReferrer, [{ k: "referrer" }, { k: "n", n: 1 }]) +
+				"<h4>各页浏览</h4>" + table(d.byPage, [{ k: "slug" }, { k: "n", n: 1 }]) +
+				"<h4>地理（城市级，不存 IP）</h4>" + table((d.byCity || []).map((x) => ({ loc: (x.country || "?") + " / " + (x.city || "?"), n: x.n })), [{ k: "loc" }, { k: "n", n: 1 }]) +
+				"<h4>点赞</h4>" + table(d.likes, [{ k: "slug" }, { k: "n", n: 1 }]) +
+				"<h4>最近访问</h4>" + table((d.recent || []).map((x) => ({ when: fmtTime(x.ts), where: x.slug + (x.source ? " ←" + x.source : ""), loc: (x.city || x.country || "") })), [{ k: "when" }, { k: "where" }, { k: "loc" }]);
+			panel.classList.add("open");
+			document.getElementById("stats-close").addEventListener("click", () => panel.classList.remove("open"));
+		}
+		if (location.hash === "#stats") openStats();
+		window.addEventListener("hashchange", () => { if (location.hash === "#stats") openStats(); });
+	})();
+</script>

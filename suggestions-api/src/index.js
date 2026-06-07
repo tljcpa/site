@@ -149,6 +149,118 @@ export default {
       return json({ ok: true }, 200, origin);
     }
 
+    // ===== 浏览量 / 点赞 / 分析 =====
+
+    // 记录一次页面浏览。隐私友好:城市级地理来自 CF(request.cf),不存完整 IP。
+    if (request.method === 'POST' && path === '/pageview') {
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        return json({ error: 'bad json' }, 400, origin);
+      }
+      const slug = String(body.slug || '').trim();
+      if (!slug || slug.length > 200) {
+        return json({ error: 'invalid slug' }, 400, origin);
+      }
+      const referrer = String(body.referrer || '').slice(0, 300);
+      const source = String(body.source || '').slice(0, 100);
+      const cf = request.cf || {};
+      await env.DB
+        .prepare('INSERT INTO pageviews (id, slug, ts, referrer, source, country, city) VALUES (?,?,?,?,?,?,?)')
+        .bind(crypto.randomUUID(), slug, Date.now(), referrer, source, cf.country || '', cf.city || '')
+        .run();
+      return json({ ok: true }, 201, origin);
+    }
+
+    // 查某页浏览量(公开)
+    if (request.method === 'GET' && path === '/pageview') {
+      const slug = url.searchParams.get('slug') || '';
+      if (!slug) {
+        return json({ error: 'slug required' }, 400, origin);
+      }
+      const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM pageviews WHERE slug=?').bind(slug).first();
+      return json({ ok: true, count: row ? row.n : 0 }, 200, origin);
+    }
+
+    // 点赞(幂等:同 token 同 slug 只算一次)
+    if (request.method === 'POST' && path === '/like') {
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        return json({ error: 'bad json' }, 400, origin);
+      }
+      const slug = String(body.slug || '').trim();
+      const token = String(body.token || '').trim();
+      if (!slug || token.length < 16) {
+        return json({ error: 'invalid' }, 400, origin);
+      }
+      try {
+        await env.DB
+          .prepare('INSERT INTO likes (id, slug, token, ts) VALUES (?,?,?,?)')
+          .bind(crypto.randomUUID(), slug, token, Date.now())
+          .run();
+      } catch (e) {
+        // UNIQUE 冲突 = 已赞过,忽略
+      }
+      const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM likes WHERE slug=?').bind(slug).first();
+      return json({ ok: true, count: row ? row.n : 0, liked: true }, 200, origin);
+    }
+
+    // 取消赞
+    if (request.method === 'DELETE' && path === '/like') {
+      const slug = url.searchParams.get('slug') || '';
+      const token = url.searchParams.get('token') || '';
+      if (!slug || token.length < 16) {
+        return json({ error: 'invalid' }, 400, origin);
+      }
+      await env.DB.prepare('DELETE FROM likes WHERE slug=? AND token=?').bind(slug, token).run();
+      const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM likes WHERE slug=?').bind(slug).first();
+      return json({ ok: true, count: row ? row.n : 0, liked: false }, 200, origin);
+    }
+
+    // 查点赞数 + 当前访客是否已赞
+    if (request.method === 'GET' && path === '/like') {
+      const slug = url.searchParams.get('slug') || '';
+      const token = url.searchParams.get('token') || '';
+      if (!slug) {
+        return json({ error: 'slug required' }, 400, origin);
+      }
+      const cnt = await env.DB.prepare('SELECT COUNT(*) AS n FROM likes WHERE slug=?').bind(slug).first();
+      let liked = false;
+      if (token.length >= 16) {
+        const mine = await env.DB.prepare('SELECT 1 FROM likes WHERE slug=? AND token=? LIMIT 1').bind(slug, token).first();
+        liked = Boolean(mine);
+      }
+      return json({ ok: true, count: cnt ? cnt.n : 0, liked }, 200, origin);
+    }
+
+    // 分析汇总(仅管理员):总 PV、各页、来源、渠道、地理、最近明细、点赞
+    if (request.method === 'GET' && path === '/analytics') {
+      if (!isAdmin(request, env)) {
+        return json({ error: 'forbidden' }, 403, origin);
+      }
+      const totalPV = await env.DB.prepare('SELECT COUNT(*) AS n FROM pageviews').first();
+      const byPage = await env.DB.prepare('SELECT slug, COUNT(*) AS n FROM pageviews GROUP BY slug ORDER BY n DESC LIMIT 60').all();
+      const byReferrer = await env.DB.prepare("SELECT referrer, COUNT(*) AS n FROM pageviews WHERE referrer!='' GROUP BY referrer ORDER BY n DESC LIMIT 30").all();
+      const bySource = await env.DB.prepare("SELECT source, COUNT(*) AS n FROM pageviews WHERE source!='' GROUP BY source ORDER BY n DESC LIMIT 30").all();
+      const byCity = await env.DB.prepare("SELECT country, city, COUNT(*) AS n FROM pageviews GROUP BY country, city ORDER BY n DESC LIMIT 40").all();
+      const recent = await env.DB.prepare('SELECT slug, ts, referrer, source, country, city FROM pageviews ORDER BY ts DESC LIMIT 100').all();
+      const likes = await env.DB.prepare('SELECT slug, COUNT(*) AS n FROM likes GROUP BY slug ORDER BY n DESC LIMIT 60').all();
+      return json({
+        ok: true,
+        admin: true,
+        totalPV: totalPV ? totalPV.n : 0,
+        byPage: byPage.results || [],
+        byReferrer: byReferrer.results || [],
+        bySource: bySource.results || [],
+        byCity: byCity.results || [],
+        recent: recent.results || [],
+        likes: likes.results || [],
+      }, 200, origin);
+    }
+
     return json({ error: 'not found' }, 404, origin);
   },
 };

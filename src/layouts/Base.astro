@@ -2,6 +2,7 @@
 import BaseHead from "@/components/BaseHead.astro";
 import Footer from "@/components/layout/Footer.astro";
 import Header from "@/components/layout/Header.astro";
+import PageStats from "@/components/PageStats.astro";
 import SkipLink from "@/components/SkipLink.astro";
 import ThemeProvider from "@/components/ThemeProvider.astro";
 import { siteConfig } from "@/site.config";
@@ -30,6 +31,7 @@ const {
 			<slot />
 		</main>
 		<Footer />
+		<PageStats />
 		<script is:inline type="speculationrules">
 			{
 				"prefetch": [

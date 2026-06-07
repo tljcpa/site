@@ -51,7 +51,7 @@
 GitHub 仓库 &rarr;
 </a> <a class="text-accent hover:underline" href="http://aihub.zdwktlj.top" target="_blank" rel="noreferrer">
 在线演示 &rarr;
-</a> </div> </header> <article class="prose prose-cactus max-w-none"> <p>一个完整的多渠道 AI 平台，前后端一个人做下来：把市面各家模型（OpenAI、Claude、智谱、硅基流动等任意 OpenAI 兼容接口）统一接进来，对外提供对话、文生图、用户系统、卡密充值和一整套管理后台。有<a href="http://aihub.zdwktlj.top" rel="noreferrer noopener" target="_blank">在线演示站</a>。重写这篇时我把代码通读了一遍，所以下面讲的是代码真实做了什么，也把几处”宣传大于实现”如实标出来。</p>
+</a> </div> </header> <article class="prose prose-cactus max-w-none" data-pagefind-body> <p>一个完整的多渠道 AI 平台，前后端一个人做下来：把市面各家模型（OpenAI、Claude、智谱、硅基流动等任意 OpenAI 兼容接口）统一接进来，对外提供对话、文生图、用户系统、卡密充值和一整套管理后台。有<a href="http://aihub.zdwktlj.top" rel="noreferrer noopener" target="_blank">在线演示站</a>。重写这篇时我把代码通读了一遍，所以下面讲的是代码真实做了什么，也把几处”宣传大于实现”如实标出来。</p>
 <h2 id="核心渠道抽象--多-key-轮询"><a class="not-prose" href="#核心渠道抽象--多-key-轮询">核心：渠道抽象 + 多 Key 轮询</a></h2>
 <p>工程上最关键的抽象是<strong>渠道（channel）</strong>。不同厂商 API 各不同但大多兼容 OpenAI 格式，所以我把每个上游抽象成一个渠道，统一走 <code>AsyncOpenAI(base_url=...)</code>——靠 base_url 切厂商，<strong>没有每厂商的 if 分支、没有适配类</strong>，“适配”完全外包给”上游必须 OpenAI 兼容”这个前提。</p>
 <p>一个渠道可以挂多个 Key，请求在这些 Key 之间轮转。<strong>这里要诚实</strong>：当年 README 写”自动负载均衡”，但代码看其实是<strong>简单的 round-robin</strong>（模块级计数器 + 取模 + 加锁），并没有按 Key 的实际负载或失败率加权。而且计数器是进程内内存态，多 worker 下不全局一致、重启清零。说它是”多 Key 轮询”准确，说”负载均衡”是当年措辞夸大了。即便如此，多 Key 轮转在单 Key 限流/额度用尽时确实能摊压力、提可用性。</p>

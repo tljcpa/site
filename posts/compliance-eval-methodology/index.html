@@ -1,0 +1,156 @@
+<!DOCTYPE html><html class="scroll-smooth" lang="zh-CN"> <head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>评估比训练更难：一次把 F1 从 58% 救回 73% 的审计复盘 • tlj 的工程笔记</title><link href="/icon.svg" rel="icon" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" type="image/png"><link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"><link href="/manifest.webmanifest" rel="manifest"><link href="https://zdwktlj.top/posts/compliance-eval-methodology/" rel="canonical"><meta content="评估比训练更难：一次把 F1 从 58% 救回 73% 的审计复盘 • tlj 的工程笔记" name="title"><meta content="模型一行代码没改，F1 却从 58.8 涨到 73.2。涨的不是模型，是我终于发现测试集本身错了。这篇记三件事：怎么发现测试集偏置、怎么用三家模型投票纠偏、以及怎么连仲裁员自己也不信。" name="description"><meta content="tlj" name="author"><meta content="article" property="og:type"><meta content="评估比训练更难：一次把 F1 从 58% 救回 73% 的审计复盘" property="og:title"><meta content="模型一行代码没改，F1 却从 58.8 涨到 73.2。涨的不是模型，是我终于发现测试集本身错了。这篇记三件事：怎么发现测试集偏置、怎么用三家模型投票纠偏、以及怎么连仲裁员自己也不信。" property="og:description"><meta content="https://zdwktlj.top/posts/compliance-eval-methodology/" property="og:url"><meta content="tlj 的工程笔记" property="og:site_name"><meta content="zh_CN" property="og:locale"><meta content="https://zdwktlj.top/og-image/compliance-eval-methodology.png" property="og:image"><meta content="1200" property="og:image:width"><meta content="630" property="og:image:height"><meta content="tlj" property="article:author"><meta content="2026-06-05T00:00:00.000Z" property="article:published_time"><meta content="summary_large_image" property="twitter:card"><meta content="https://zdwktlj.top/posts/compliance-eval-methodology/" property="twitter:url"><meta content="评估比训练更难：一次把 F1 从 58% 救回 73% 的审计复盘" property="twitter:title"><meta content="模型一行代码没改，F1 却从 58.8 涨到 73.2。涨的不是模型，是我终于发现测试集本身错了。这篇记三件事：怎么发现测试集偏置、怎么用三家模型投票纠偏、以及怎么连仲裁员自己也不信。" property="twitter:description"><meta content="https://zdwktlj.top/og-image/compliance-eval-methodology.png" property="twitter:image"><link href="/sitemap-index.xml" rel="sitemap"><link href="/rss.xml" title="Blog" rel="alternate" type="application/rss+xml"><link href="/notes/rss.xml" title="Notes" rel="alternate" type="application/rss+xml"><meta content="Astro v6.3.3" name="generator"><script>
+	const lightModePref = window.matchMedia("(prefers-color-scheme: light)");
+
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return storedTheme || (lightModePref.matches ? "light" : "dark");
+	}
+
+	function setTheme(newTheme) {
+		if (newTheme !== "light" && newTheme !== "dark") {
+			return console.warn(
+				`Invalid theme value '${newTheme}' received. Expected 'light' or 'dark'.`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// root already set to newTheme, exit early
+		if (newTheme === root.getAttribute("data-theme")) {
+			return;
+		}
+
+		root.setAttribute("data-theme", newTheme);
+
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// listen for pageshow event, browser restored page from bfcache
+	window.addEventListener("pageshow", (e) => {
+		if (e.persisted) {
+			setTheme(getUserPref());
+		}
+	});
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+
+	// listen for prefers-color-scheme change.
+	lightModePref.addEventListener("change", (e) => setTheme(e.matches ? "light" : "dark"));
+</script><link rel="stylesheet" href="/_astro/Base.Db_WKQ2R.b6.css"></head> <body class="bg-global-bg text-global-text mx-auto flex min-h-screen max-w-3xl flex-col px-4 pt-16 font-mono text-sm font-normal antialiased sm:px-8"> <a class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5" href="#main">skip to content
+</a> <header class="group relative mb-28 flex items-center sm:ps-18" id="main-header"> <div class="flex sm:flex-col"> <a aria-current="false" class="inline-flex items-center sm:relative sm:inline-block sm:grayscale sm:hover:filter-none" href="/"> <svg aria-hidden="true" class="me-3 h-10 w-6 sm:absolute sm:-start-18 sm:me-0 sm:h-20 sm:w-12" fill="none" focusable="false" viewBox="0 0 272 480" xmlns="http://www.w3.org/2000/svg"> <title>Astro Cactus Logo</title> <path fill="#cdffb8" d="M181.334 93.333v-40L226.667 80v40zM136.001 53.333 90.667 26.667v426.666L136.001 480zM45.333 220 0 193.334v140L45.333 360z"></path><path fill="#d482ab" d="M90.667 26.667 136.001 0l45.333 26.667-45.333 26.666zM181.334 53.33l45.333-26.72L272 53.33 226.667 80zM136 240l-45.333-26.67v53.34zM0 193.33l45.333-26.72 45.334 26.72L45.333 220zM181.334 93.277 226.667 120l-45.333 26.67z"></path><path fill="#2abc89" d="m136 53.333 45.333-26.666v120L226.667 120V80L272 53.333V160l-90.667 53.333v240L136 480V306.667L45.334 360V220l45.333-26.667v73.334L136 240z"></path> </svg> <span class="text-xl font-bold sm:text-2xl">tlj 的工程笔记</span> </a> <nav aria-label="Main menu" class="bg-global-bg absolute -inset-x-4 top-12 hidden flex-col divide-y px-2 py-4 group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:z-auto sm:-ms-4 sm:mt-1 sm:flex sm:flex-row sm:divide-x sm:divide-y-0 sm:bg-transparent sm:p-0" id="navigation-menu"> <a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/"> 首页 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/projects/"> 项目 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/posts/"> 博客 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/about/"> 关于 </a> </nav> </div> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D5egCzIc.js"></script> <pagefind-config baseUrl="/" bundle-path="/pagefind/"></pagefind-config> <pagefind-modal-trigger id="search" class="ms-auto" hide-shortcut="true" compact="true"></pagefind-modal-trigger> <pagefind-modal></pagefind-modal> <theme-toggle class="ms-2 sm:ms-4"> <button class="hover:text-accent relative h-9 w-9 cursor-pointer p-2" type="button"> <span class="sr-only">Dark Theme</span> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" fill="none" focusable="false" id="sun-svg" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" fill="none" focusable="false" id="moon-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M0 0h24v24H0z" fill="none" stroke="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.C1tldoqx.js"></script> <mobile-button> <button aria-expanded="false" aria-haspopup="menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" id="toggle-navigation-menu" type="button"> <span class="sr-only">Open main menu</span> <svg aria-hidden="true" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" fill="none" focusable="false" id="line-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M3.75 9h16.5m-16.5 6.75h16.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="text-accent absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" class="text-accent" fill="none" focusable="false" id="cross-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </button> </mobile-button> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DuSsDY4R.js"></script> <main id="main">  <article class="grow break-words" data-pagefind-body> <div id="blog-hero" class="mb-12"><h1 class="title"> 评估比训练更难：一次把 F1 从 58% 救回 73% 的审计复盘 </h1> <div class="flex flex-wrap items-center gap-x-3 gap-y-2"> <p class="font-semibold"> <time datetime="2026-06-05T00:00:00.000Z" title="2026-06-05T00:00:00.000Z">2026年6月5日</time> /  12 min read </p>  </div> <div class="mt-2"> <svg aria-hidden="true" class="inline-block h-6 w-6" fill="none" focusable="false" stroke="var(--color-muted)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M0 0h24v24H0z" fill="none" stroke="none"></path> <path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z"></path> <path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116"></path> <path d="M6 9h-.01"></path> </svg> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:模型微调" href="/tags/模型微调/"><span class="sr-only">View more blogs with the tag&nbsp;</span>模型微调 </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:评估方法论" href="/tags/评估方法论/"><span class="sr-only">View more blogs with the tag&nbsp;</span>评估方法论 </a>,  </span> <span class="contents"> <a class="cactus-link inline-block before:content-['#']" data-pagefind-filter="tag:合规模型" href="/tags/合规模型/"><span class="sr-only">View more blogs with the tag&nbsp;</span>合规模型 </a> </span>  </div></div> <div class="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between"> <details open class="lg:sticky lg:top-12 lg:order-2 lg:-me-32 lg:basis-64"> <summary class="title hover:marker:text-accent cursor-pointer text-lg">Table of Contents</summary> <nav class="ms-4 lg:w-full"> <ol class="mt-4"> <li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#一第一层你以为在测模型其实在测测试集"><span aria-hidden="true" class="me-0.5">#</span>一、第一层：你以为在测模型，其实在测测试集</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#二第二层审计本身不可信所以让三家模型投票"><span aria-hidden="true" class="me-0.5">#</span>二、第二层：审计本身不可信，所以让三家模型投票</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#三第三层连仲裁员也别全信审计审计员"><span aria-hidden="true" class="me-0.5">#</span>三、第三层：连仲裁员也别全信——审计审计员</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#四诚实的部分有些事我没做成"><span aria-hidden="true" class="me-0.5">#</span>四、诚实的部分：有些事我没做成</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#五到不了-90以及为什么"><span aria-hidden="true" class="me-0.5">#</span>五、到不了 90%，以及为什么</a>  </li><li class> <a class="line-clamp-2 hover:text-accent mt-3" href="#小结"><span aria-hidden="true" class="me-0.5">#</span>小结</a>  </li> </ol> </nav> </details> <div class="prose prose-sm prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:before:absolute prose-headings:before:-ms-4 prose-headings:before:text-muted prose-headings:hover:before:text-accent sm:prose-headings:before:content-['#'] sm:prose-th:before:content-none">  <p>合规模型那段时间，我盯着一个数字发愁很久：F1 只有 58.8%，离 90% 的目标差了一大截。我换 prompt、改 reranker、清数据，折腾一圈也就抠回来几个点。</p>
+<p>后来真正把它推到 73.2% 的，不是任何一次训练——<strong>模型权重一个 bit 没动</strong>。变的是我终于意识到：我一直在测的那个测试集，本身是错的。</p>
+<p>这篇是关于”怎么知道自己的评估在骗自己”的复盘。我现在觉得，对一个微调项目，<strong>搭一套可信的评估，比再训一版模型难，也值钱</strong>。</p>
+<h2 id="一第一层你以为在测模型其实在测测试集"><a class="not-prose" href="#一第一层你以为在测模型其实在测测试集">一、第一层：你以为在测模型，其实在测测试集</a></h2>
+<p>任务是多平台内容合规检测（小红书 / 抖音 / 视频号 / 公众号），给一段文案，模型要指出它违反了哪条平台规则、并引用违规片段。</p>
+<p>测试集是这么造的：拿一条规则，让大模型写一段”违反这条规则”的文案，GT（标准答案）就标这一条规则。听起来很合理。问题是——<strong>一段真实的违规文案，往往同时违反好几条相似的规则</strong>，但 GT 只标了一条。</p>
+<p>举几个真实样本：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>文案</th><th>GT 只标了</th><th>模型还预测了</th><th>两个都成立吗</th></tr></thead><tbody><tr><td>用了精华三天皱纹全消</td><td>夸张前后对比</td><td>虚假误导信息</td><td>都成立</td></tr><tr><td>刚从急诊室出来，我是追尾司机</td><td>假冒热点当事人</td><td>过度博取关注</td><td>都成立</td></tr><tr><td>扫码进群，一起搞钱</td><td>欺诈赌博信息</td><td>站外导流</td><td>都成立</td></tr></tbody></table>
+<p>模型多识别出来的那条，<strong>是真的违规</strong>，但因为 GT 没标，评估脚本把它算成了”误报”(False Positive)，扣模型的精确率。</p>
+<p>我统计了一下这个”冤枉”有多严重：被判成误报的样本里，<strong>平均 37% 其实是合理的多标签识别</strong>。规则越多的平台越夸张——视频号 31.5% 的样本确认是多标签，抖音 26%。</p>
+<p>也就是说，58.8% 这个数字从一开始就是错的。它惩罚了模型做对的事。<strong>任务本质是 multi-label，而我用 single-label 的尺子在量。</strong> 改用审计修订过的测试集重测，真实 F1 是 73.2%。一个点的训练没做，凭空”涨”了 14.7。</p>
+<p>这里第一个方法论：<strong>当模型表现差到不合常理时，先怀疑测试集，而不是先怀疑模型。</strong> 测试集的标注质量，是模型 F1 的天花板——你的 GT 有 5% 噪声，模型再强也撞不破那 5%。</p>
+<h2 id="二第二层审计本身不可信所以让三家模型投票"><a class="not-prose" href="#二第二层审计本身不可信所以让三家模型投票">二、第二层：审计本身不可信，所以让三家模型投票</a></h2>
+<p>发现偏置只是第一步。接下来要逐条判定：每一个被算成”误报”的预测，到底是”合理多标签”（该给模型加分），还是”真混淆”（模型确实认错了规则）。1460 条测试样本，挑出上千条争议 case，人工一条条看不现实。</p>
+<p>我的第一版是用单个大模型当仲裁员，跑一遍。但很快就不放心——<strong>单一模型有它自己的系统性偏见</strong>，它说”这条算违规”，我凭什么信？用同一个模型跑三次也没用，那只是降低随机方差，纠不了它一以贯之的偏。</p>
+<p>于是改成<strong>三厂商独立投票</strong>：DeepSeek、通义千问、Kimi 三家<strong>不同厂商</strong>的模型，对同一条 case、同一个 prompt、温度 0，各自独立判一次。规则是：</p>
+<ul>
+<li><strong>≥2/3 一致</strong>才作为最终结论（多数票）</li>
+<li><strong>1/3 平局</strong>的边界 case 单独标出来，交人工</li>
+</ul>
+<p>为什么一定要三个不同厂商，而不是一个模型的三次采样：不同厂商的训练数据、对齐方式、价值取向都不一样，它们的偏见<strong>不相关</strong>。三个不相关的偏见取多数票，才能把单一模型的系统性错误投下去；同一个模型投三次，三票错的方向是一样的，投了等于没投。这是评估里”评委要互相独立”的朴素道理。</p>
+<p>仲裁 prompt 我钉死了四条判断标准，逼模型按统一尺度判，而不是凭感觉：</p>
+<ol>
+<li>引用片段必须是文案的精确子串</li>
+<li>片段要直接、明确触发规则描述的违规行为</li>
+<li>仅仅话题相关、领域相似 → 不算违规</li>
+<li>规则禁止的是 A、但片段做的是 B → 不算违规</li>
+</ol>
+<p>跑完之后，三家投票的结果反过来修订测试集：多数判”合理多标签”的，把这条违规补进 GT；多数判”真混淆”的，留下来作为模型真实的错误，单独提取成一张 <code>confusion_map</code>（哪条规则容易被错认成哪条），反哺后续训练。</p>
+<p>（一个安全教训顺便记下：第一版仲裁脚本把云网关的 API key 直接硬编码在源码里——这是反面教材，凭证该走环境变量。)</p>
+<h2 id="三第三层连仲裁员也别全信审计审计员"><a class="not-prose" href="#三第三层连仲裁员也别全信审计审计员">三、第三层：连仲裁员也别全信——审计审计员</a></h2>
+<p>到这一步我本可以收工了。但有个不安：我那个仲裁 prompt 写得很严，会不会<strong>矫枉过正</strong>，把一些其实合理的多标签也判成了”真混淆”，反过来又冤枉了模型？</p>
+<p>于是做了第三层验证：抽 40 条”严格标准下判为真混淆”的 case，换一套<strong>宽松标准</strong>重判一遍。结果吓我一跳——<strong>53.8% 在宽松标准下反转成了”合理”</strong>。</p>
+<p>这说明我的仲裁员标准偏严，73.2% 这个数字<strong>仍然在低估模型</strong>，真实合理 F1 大概在 73-80% 区间。</p>
+<p>这一层我觉得是整套评估里最有价值的思维：<strong>任何一把尺子都有它的偏，包括你用来纠偏的那把。</strong> 你审计了模型，那谁来审计你的审计？做一次反向抽样（用相反方向的标准复核一批结论，看反转率），就能估出你这把尺子本身的系统误差有多大。反转率 53% 是个刺眼的信号——它告诉我”73.2% 是个下界，不是真值”。</p>
+<h2 id="四诚实的部分有些事我没做成"><a class="not-prose" href="#四诚实的部分有些事我没做成">四、诚实的部分：有些事我没做成</a></h2>
+<p>评估理清之后，结构性的瓶颈也暴露了。模型的推理 pipeline 是 <code>scan → 分组 → reranker 每组选 1 条 → 输出</code>，这个”每组只选 1 条”在多标签任务里<strong>必然漏召回</strong>——同一段文字同时违反两条规则时，reranker 只能挑一条。</p>
+<p>我试着把单选改成多选，做了两版：</p>
+<ul>
+<li>多选 v1（宽松 prompt）：精确率从 70% 暴跌到 41.6%，模型开始乱标。</li>
+<li>多选 v2（严格 prompt）：精确率回到 53.2%，但整体 F1 还是低于单选基线。</li>
+</ul>
+<p>两次都失败。结论很硬：<strong>prompt 工程已经到天花板</strong>，模型本身分辨”两条都对”和”只有一条对”的能力就是不够，这不是调 prompt 能解决的，得靠多标签数据重训。我没有把失败的实验藏起来——负面结果也是结论，它划清了”工程能修”和”得换方法”的边界。</p>
+<h2 id="五到不了-90以及为什么"><a class="not-prose" href="#五到不了-90以及为什么">五、到不了 90%，以及为什么</a></h2>
+<p>最后我给的结论是：在 24GB 单卡 + 现有数据的条件下，<strong>工程优化的天花板大约 75-78%，到不了 90%</strong>。原因分三层，每层都不是靠努力能绕过的：</p>
+<ol>
+<li><strong>硬件</strong>：24GB 只能 QLoRA 4-bit（带量化噪声）、batch 上不去、epoch 只能跑 1、Packing 直接 OOM。换 48GB 上 BF16 + FlashAttention 2，预期也就 +3-5pp。</li>
+<li><strong>任务定义</strong>：规则之间天然语义重叠（“诱导关注” vs “违规导流” vs “诱导点击” 边界本就模糊），连人类审核员之间的一致率都只有 90-95%。GT 的噪声就是模型的天花板。</li>
+<li><strong>数据规模</strong>：部分规则在训练集里只有 2-3 条样本，模型根本学不充分。</li>
+</ol>
+<p>所以我给的不是”再努力一把冲 90%“，而是<strong>改评估指标</strong>：任务本质是 multi-label，就该用 multi-label F1 或 top-3 召回来量，而不是 single-label F1。换了指标，当前模型其实已经接近目标。指标定义错了，再怎么优化模型都是在错误的靶子上打靶。</p>
+<h2 id="小结"><a class="not-prose" href="#小结">小结</a></h2>
+<p>这个项目我学到最实的一课，不在训练里，在评估里：</p>
+<ul>
+<li><strong>模型差到不合理时，先验尸测试集。</strong> 标注质量是 F1 的硬天花板。</li>
+<li><strong>要纠偏，就让相互独立的多个评委投票</strong>——同一个模型投三次不算独立。</li>
+<li><strong>连你的纠偏工具也要被审计</strong>：反向抽样估自己的系统误差。</li>
+<li><strong>指标定义本身可能是错的</strong>：用 single-label 的尺子量 multi-label 的任务，再好的模型也会显得很差。</li>
+</ul>
+<p>训练让模型学会一件事，评估决定你<strong>能不能看清它到底学没学会</strong>。后者错了，前者的努力全部白费。</p>  </div> </div> </article> <button class="hover:border-link fixed end-4 bottom-8 z-90 flex h-10 w-10 translate-y-28 cursor-pointer items-center justify-center rounded-full border-2 border-transparent bg-zinc-200 text-3xl opacity-0 transition-all transition-discrete duration-300 data-[show=true]:translate-y-0 data-[show=true]:opacity-100 sm:end-8 sm:h-12 sm:w-12 dark:bg-zinc-700" data-show="false" id="to-top-btn"> <span class="sr-only">Back to top</span> <svg aria-hidden="true" class="h-6 w-6" fill="none" focusable="false" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </button>  </main> <footer class="text-muted mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">
+&copy; tlj 2026.<span class="inline-block">&nbsp;🚀&nbsp;tlj 的工程笔记&nbsp;🌵&nbsp;</span> </div> <nav aria-labelledby="footer_links" class="sm:divide-muted flex gap-x-2 sm:gap-x-0 sm:divide-x"> <p id="footer_links" class="sr-only">More on this site</p> <a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/"> 首页 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/projects/"> 项目 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/posts/"> 博客 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/about/"> 关于 </a> </nav> </footer> <script type="speculationrules">
+			{
+				"prefetch": [
+					{
+						"where": {
+							"href_matches": "/*"
+						},
+						"eagerness": "immediate"
+					}
+				],
+				"prerender": [
+					{
+						"where": {
+							"href_matches": "/*"
+						},
+						"eagerness": "moderate"
+					}
+				]
+			}
+		</script> </body> </html> <script type="module">const e=document.getElementById("to-top-btn"),n=document.getElementById("blog-hero");function c(t){t.forEach(o=>{e.dataset.show=(!o.isIntersecting).toString()})}e.addEventListener("click",()=>{document.documentElement.scrollTo({behavior:"smooth",top:0})});const r=new IntersectionObserver(c);r.observe(n);</script>

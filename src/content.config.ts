@@ -35,6 +35,8 @@ const post = defineCollection({
 				.optional()
 				.transform((str) => (str ? new Date(str) : undefined)),
 			pinned: z.boolean().default(false),
+			// 系列归属(如 compliance / driving),用于首页聚合与项目页的系列导航
+			series: z.string().optional(),
 		}),
 });
 
@@ -83,6 +85,12 @@ const project = defineCollection({
 			demoUrl: z.string().optional(),
 			// 排序权重,大的靠前
 			weight: z.number().default(0),
+			// 系列归属(如 compliance / driving),用于首页聚合
+			series: z.string().optional(),
+			// 旗舰项目(首页大卡,唯一)
+			flagship: z.boolean().default(false),
+			// 精选项目(首页精选区展示)
+			featured: z.boolean().default(false),
 			// 时间区间,纯展示字符串(如 "2026-05")
 			period: z.string().optional(),
 			publishDate: z

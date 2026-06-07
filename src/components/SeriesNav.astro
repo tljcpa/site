@@ -1,0 +1,60 @@
+---
+// 系列导航:在项目页/文章页展示同系列的文章,按逻辑顺序。把散落的深度复盘聚拢成一条线。
+import { getAllPosts } from "@/data/post";
+
+interface Props {
+	series?: string;
+	current?: string; // 当前文章 id,高亮且不加链接
+}
+const { series, current } = Astro.props;
+
+// 系列顺序与标题(集中维护)
+const ORDERS: Record<string, string[]> = {
+	compliance: [
+		"compliance-dataset-from-scratch",
+		"compliance-dataset-engineering",
+		"finetune-six-experiments",
+		"distributed-finetune-8gpu",
+		"finetune-misleading-metrics",
+		"compliance-eval-methodology",
+		"compliance-pitfalls-reference",
+	],
+	driving: ["vla-action-tokenization", "qlora-memory-budget"],
+};
+const LABELS: Record<string, string> = {
+	compliance: "合规质检模型 · 深度复盘系列",
+	driving: "智驾 / 具身（VLA）· 系列笔记",
+};
+
+const order = series ? ORDERS[series] : undefined;
+let items: { id: string; title: string }[] = [];
+if (order) {
+	const posts = await getAllPosts();
+	items = order
+		.map((id) => posts.find((p) => p.id === id))
+		.filter((p) => p !== undefined)
+		.map((p) => ({ id: p.id, title: p.data.title }));
+}
+---
+
+{
+	series && items.length > 0 && (
+		<aside class="border-accent/30 bg-accent/5 mt-12 rounded-lg border-l-2 p-5 text-sm">
+			<p class="text-accent mb-3 font-semibold">{LABELS[series] ?? "系列"}</p>
+			<ol class="space-y-1.5">
+				{items.map((it, i) => (
+					<li>
+						<span class="text-muted mr-1">{i + 1}.</span>
+						{it.id === current ? (
+							<span class="text-global-text font-semibold">{it.title}（当前）</span>
+						) : (
+							<a href={`/posts/${it.id}/`} class="text-accent hover:underline">
+								{it.title}
+							</a>
+						)}
+					</li>
+				))}
+			</ol>
+		</aside>
+	)
+}

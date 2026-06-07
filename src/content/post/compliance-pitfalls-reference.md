@@ -4,6 +4,7 @@ description: "这是给我自己的速查表，不是给别人看的故事。把
 publishDate: "2026-05-21"
 tags: ["踩坑速查", "大模型微调", "实习"]
 pinned: true
+series: compliance
 ---
 
 这篇和别的不一样——它不是复盘故事，是给我自己的**速查表**。那个内容合规模型项目（[总览](/projects/content-moderation-finetune/)）从数据工程到部署，坑太多，压成感悟我下次照样重踩。所以这里按"现象 → 根因 → 解法"把每个坑记全，能 grep 到、能照着避开就行。不追求文笔，追求完整。

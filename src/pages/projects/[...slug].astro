@@ -4,6 +4,7 @@ import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import { getAllProjects } from "@/data/project";
 import PageLayout from "@/layouts/Base.astro";
 import SuggestionLayer from "@/components/SuggestionLayer.astro";
+import SeriesNav from "@/components/SeriesNav.astro";
 
 export const getStaticPaths = (async () => {
 	const projects = await getAllProjects();
@@ -82,5 +83,6 @@ const { data } = project;
 	<article class="prose prose-cactus max-w-none" data-pagefind-body>
 		<Content />
 	</article>
+	<SeriesNav series={data.series} />
 	<SuggestionLayer />
 </PageLayout>

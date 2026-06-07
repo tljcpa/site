@@ -4,6 +4,7 @@ description: "在那个合规模型能开始训练之前，得先有数据。这
 publishDate: "2026-04-05"
 tags: ["数据工程", "爬虫", "大模型微调", "合规"]
 pinned: true
+series: compliance
 ---
 
 我那个内容合规模型项目，前面已经写了[评估口径之战](/posts/finetune-misleading-metrics/)和[接手后重做数据集](/posts/compliance-dataset-engineering/)。这篇往更前推——在模型能开始训练之前，数据是怎么从无到有搭起来的。这是整个项目最源头、也几乎全是我从零做的一个月（2026 年 3 月底到 4 月底）。

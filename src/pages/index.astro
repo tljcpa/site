@@ -1,85 +1,170 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
-import PostPreview from "@/components/blog/PostPreview.astro";
-import Note from "@/components/note/Note.astro";
+import { getCollection } from "astro:content";
 import SocialList from "@/components/SocialList.astro";
 import { getAllPosts } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
-import { collectionDateSort } from "@/utils/date";
 
-// Posts
-const MAX_POSTS = 10;
-const allPosts = await getAllPosts();
-const allPostsByDate = allPosts.sort(collectionDateSort) as CollectionEntry<"post">[];
-const latestPosts = allPostsByDate.slice(0, MAX_POSTS);
+const projects = await getCollection("project", ({ data }) =>
+	import.meta.env.PROD ? !data.draft : true,
+);
+const posts = await getAllPosts();
 
-// Pinned Posts, set to a max of 3;
-const MAX_PINNED_POSTS = 3;
-const pinnedPosts = allPostsByDate
-	.values()
-	.filter((p) => p.data.pinned)
-	.take(MAX_PINNED_POSTS)
-	.toArray();
+// 旗舰项目(唯一)
+const flagship = projects.find((p) => p.data.flagship);
 
-// Notes, set to a max of 5
-const MAX_NOTES = 5;
-const allNotes = await getCollection("note");
-const latestNotes = allNotes
-	.sort(collectionDateSort)
-	.slice(0, MAX_NOTES) as CollectionEntry<"note">[];
+// 合规旗舰的深度复盘系列,按逻辑顺序(不是时间)
+const complianceOrder = [
+	"compliance-dataset-from-scratch",
+	"compliance-dataset-engineering",
+	"finetune-six-experiments",
+	"distributed-finetune-8gpu",
+	"finetune-misleading-metrics",
+	"compliance-eval-methodology",
+	"compliance-pitfalls-reference",
+];
+const complianceSeries = complianceOrder
+	.map((id) => posts.find((p) => p.id === id))
+	.filter((p) => p !== undefined);
+
+// 正在主攻:智驾/具身
+const drivingProject = projects.find((p) => p.id === "drivegpt4-mini");
+const drivingOrder = ["vla-action-tokenization", "qlora-memory-budget"];
+const drivingPosts = drivingOrder
+	.map((id) => posts.find((p) => p.id === id))
+	.filter((p) => p !== undefined);
+
+// 精选其他(排除已在智驾区的 drivegpt4)
+const featured = projects.filter((p) => p.data.featured && p.id !== "drivegpt4-mini");
 ---
 
-<PageLayout meta={{ title: "Home" }}>
+<PageLayout meta={{ title: "首页" }}>
+	{/* 定位 */}
 	<section>
-		<h1 class="title mb-6">你好，我是 tlj</h1>
+		<h1 class="title mb-4 text-2xl sm:text-3xl">tlj · 大模型工程落地，正在主攻智驾 / 具身</h1>
 		<p class="text-muted mb-4">
-			做大模型微调、RAG 和全栈开发。这里是我近三个月攒下的工程复盘——把项目里真正踩过的坑、做过的取舍记下来，不是教程，是现场。
+			我做大模型工程的全链路落地——从数据清洗、QLoRA 微调、评估方法论到 vLLM 部署量化，在一个真实的内容合规质检项目里完整跑通过。现在我把这套能力迁移到智能驾驶和具身智能方向（VLA），这是我接下来主攻的领域。
 		</p>
-		<p class="text-muted mb-4">
-			想看做过什么，去 <a class="text-accent hover:underline" href="/projects/">项目</a>；想看具体怎么趟过来的，往下翻博客。
+		<p class="text-muted mb-4 text-sm">
+			下面这些是真实的工程复盘——踩过的坑、做过的取舍、算过的账，不是教程，是现场。
 		</p>
 		<SocialList />
 	</section>
+
+	{/* 旗舰 */}
 	{
-		pinnedPosts.length > 0 && (
-			<section class="mt-16">
-				<h2 class="title mb-6 text-xl">Pinned Posts</h2>
-				<ul class="space-y-4" role="list">
-					{pinnedPosts.map((p) => (
-						<li class="grid gap-1 sm:grid-cols-[auto_1fr]">
-							<PostPreview post={p} />
+		flagship && (
+			<section class="mt-14">
+				<div class="mb-4 flex items-center gap-2">
+					<span class="bg-accent/15 text-accent rounded px-2 py-0.5 text-xs font-semibold">
+						旗舰 · 实习
+					</span>
+					<h2 class="title text-lg">最能代表我能力的项目</h2>
+				</div>
+				<a
+					href={`/projects/${flagship.id}/`}
+					class="border-accent/40 hover:border-accent block rounded-lg border-2 p-6 transition-colors"
+				>
+					<h3 class="text-accent mb-2 text-xl font-bold">{flagship.data.title}</h3>
+					<p class="text-muted mb-3 text-sm">{flagship.data.description}</p>
+					{flagship.data.highlight && (
+						<p class="mb-3 text-sm">
+							<span class="text-accent">→ </span>
+							{flagship.data.highlight}
+						</p>
+					)}
+					{flagship.data.stack.length > 0 && (
+						<ul class="flex flex-wrap gap-1.5" role="list">
+							{flagship.data.stack.map((tech) => (
+								<li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">{tech}</li>
+							))}
+						</ul>
+					)}
+				</a>
+				{complianceSeries.length > 0 && (
+					<div class="border-accent/30 mt-4 border-l-2 pl-4">
+						<p class="text-muted mb-2 text-xs">
+							一个项目，我能写出 {complianceSeries.length} 篇深度复盘——这套厚度本身就是信号：
+						</p>
+						<ul class="space-y-1.5" role="list">
+							{complianceSeries.map((p, i) => (
+								<li class="text-sm">
+									<span class="text-muted mr-1">{i + 1}.</span>
+									<a href={`/posts/${p.id}/`} class="text-accent hover:underline">
+										{p.data.title}
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+			</section>
+		)
+	}
+
+	{/* 正在主攻:智驾 / 具身 */}
+	{
+		drivingProject && (
+			<section class="mt-14">
+				<div class="mb-4 flex items-center gap-2">
+					<span class="rounded bg-amber-400/20 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+						正在主攻
+					</span>
+					<h2 class="title text-lg">智驾 / 具身（VLA）</h2>
+				</div>
+				<p class="text-muted mb-4 text-sm">
+					我正在把上面那套大模型工程能力迁移到驾驶 / 具身方向。诚实说：这块还在攻坚期——目前是一个真实的小复现加上对前沿的系统理解，硬项目还在做。但方向明确，下面是起步。
+				</p>
+				<a
+					href={`/projects/${drivingProject.id}/`}
+					class="border-muted/40 hover:border-accent mb-3 block rounded-lg border p-5 transition-colors"
+				>
+					<h3 class="text-accent mb-2 text-lg font-semibold">{drivingProject.data.title}</h3>
+					<p class="text-muted mb-2 text-sm">{drivingProject.data.description}</p>
+					{drivingProject.data.highlight && (
+						<p class="text-sm">
+							<span class="text-accent">→ </span>
+							{drivingProject.data.highlight}
+						</p>
+					)}
+				</a>
+				{drivingPosts.length > 0 && (
+					<ul class="space-y-1.5" role="list">
+						{drivingPosts.map((p) => (
+							<li class="text-sm">
+								<span class="text-muted mr-1">·</span>
+								<a href={`/posts/${p.id}/`} class="text-accent hover:underline">
+									{p.data.title}
+								</a>
+							</li>
+						))}
+					</ul>
+				)}
+			</section>
+		)
+	}
+
+	{/* 精选其他 */}
+	{
+		featured.length > 0 && (
+			<section class="mt-14">
+				<h2 class="title mb-4 text-lg">其他精选项目</h2>
+				<ul class="grid grid-cols-1 gap-4 sm:grid-cols-2" role="list">
+					{featured.map((p) => (
+						<li class="border-muted/40 hover:border-accent flex flex-col rounded-md border p-4 transition-colors">
+							<a href={`/projects/${p.id}/`} class="text-accent mb-1 font-semibold hover:underline">
+								{p.data.title}
+							</a>
+							<p class="text-muted text-sm">{p.data.description}</p>
 						</li>
 					))}
 				</ul>
 			</section>
 		)
 	}
-	<section class="mt-16">
-		<h2 class="title text-accent mb-6 text-xl"><a href="/posts/">Posts</a></h2>
-		<ul class="space-y-4" role="list">
-			{
-				latestPosts.map((p) => (
-					<li class="grid gap-1 sm:grid-cols-[auto_1fr]">
-						<PostPreview post={p} />
-					</li>
-				))
-			}
-		</ul>
+
+	{/* 入口 */}
+	<section class="border-muted/30 mt-14 flex gap-6 border-t pt-6 text-sm">
+		<a href="/projects/" class="text-accent hover:underline">全部项目 &rarr;</a>
+		<a href="/posts/" class="text-accent hover:underline">全部博客 &rarr;</a>
 	</section>
-	{
-		latestNotes.length > 0 && (
-			<section class="mt-16">
-				<h2 class="title text-accent mb-6 text-xl">
-					<a href="/notes/">Notes</a>
-				</h2>
-				<ul class="space-y-6" role="list">
-					{latestNotes.map((note) => (
-						<li>
-							<Note note={note} as="h3" isPreview />
-						</li>
-					))}
-				</ul>
-			</section>
-		)
-	}
 </PageLayout>

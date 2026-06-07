@@ -37,3 +37,6 @@ env.sh
 tools/
 .claude/
 .build.log
+_repo_*
+_dg4
+_theme-tmp

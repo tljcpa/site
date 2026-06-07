@@ -7,10 +7,11 @@ role: "独立开发（后端 / AI 管线 / 部署）"
 period: "2026-05"
 highlight: "Adapter 插件化架构，加一个平台只写一个约 100 行子类；起草成本路由 + 诚实版导出"
 stack: ["FastAPI", "SQLite", "DeepSeek", "Playwright", "Docker"]
+repoUrl: "https://github.com/tljcpa/qiniu-multi-publish"
 weight: 70
 ---
 
-一次暑期编程实训营的赛题（题目二）。写一篇稿子，自动适配成各平台（公众号/知乎/B站/小红书）各自的调性和格式，省掉手动一遍遍改写。
+七牛云实训营的题目二。写一篇稿子，自动适配成各平台（公众号/知乎/B站/小红书）各自的调性和格式，省掉手动一遍遍改写。
 
 ## 插件化的 Adapter 架构：加平台就是写个子类
 

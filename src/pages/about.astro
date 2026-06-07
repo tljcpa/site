@@ -2,7 +2,7 @@
 import PageLayout from "@/layouts/Base.astro";
 
 const meta = {
-	description: "关于 tlj——做大模型微调、RAG 和全栈开发的工程师。",
+	description: "关于 tlj——大模型工程落地，正在主攻智驾 / 具身（VLA）。",
 	title: "关于",
 };
 ---
@@ -11,22 +11,19 @@ const meta = {
 	<h1 class="title mb-12">关于</h1>
 	<div class="prose prose-sm prose-cactus max-w-none">
 		<p>
-			我是 tlj，主要做大模型微调、RAG 和全栈开发。这个站收录我近三个月做过的项目，以及过程中的工程复盘。
+			我是 tlj。这几个月我在做大模型工程的完整落地——从数据清洗、QLoRA 微调、评估方法，到 vLLM 部署量化，在一个真实的内容合规质检项目里从头走了一遍。现在我在把这套能力往智能驾驶和具身智能（VLA）迁移。这个方向我刚起步，目前是一个验证性的小复现加上对前沿的梳理，有分量的项目还在做——我不想把它说得比实际更大。
 		</p>
 		<p>
-			比起结论，我更想记录过程：一个功能为什么这样设计、踩过哪些坑、当时在几个方案之间如何权衡。这些内容在教程里很少见，却往往是真正花掉时间的地方。
-		</p>
-		<p>长期关注的方向：</p>
-		<ul class="list-inside list-disc" role="list">
-			<li>大模型微调与数据工程</li>
-			<li>检索增强（RAG）与评测</li>
-			<li>把模型能力落进可用产品的全栈工程</li>
-		</ul>
-		<p>
-			最近在入门<strong>具身智能与智能驾驶</strong>（VLM / VLA 方向），刚起步，<a class="cactus-link inline-block" href="/projects/drivegpt4-mini/">DriveGPT4-Mini</a> 是我在这个方向上的第一个动手复现。
+			比起结论，我更想记录过程：一个东西为什么这么设计、踩过哪些坑、当时在几个方案之间怎么权衡。这些在教程里很少见，却常常是真正花掉时间的地方。没做成的部分我也照实写，做到哪写到哪，不替没验证过的结论背书。
 		</p>
 		<p>
-			想看具体做过什么，去 <a class="cactus-link inline-block" href="/projects/">项目</a>；想看过程，翻 <a class="cactus-link inline-block" href="/posts/">博客</a>。
+			看到比我强的工作和人，我习惯先搞清楚它为什么强，再想办法追上去。技术上我更认实质，不太想在包装上费功夫。
+		</p>
+		<p>
+			这个站每一段文字你都能划线给我提建议（只有你和我看得到）。要是你觉得我哪里想错了、或者有更好的做法，直接说——我更想往前走，不太想停在已经会的东西上。
+		</p>
+		<p>
+			想看做过什么，去 <a class="cactus-link inline-block" href="/projects/">项目</a>；想看过程，翻 <a class="cactus-link inline-block" href="/posts/">博客</a>。
 		</p>
 	</div>
 </PageLayout>

@@ -54,12 +54,7 @@ const featured = projects.filter((p) => p.data.featured && p.id !== "drivegpt4-m
 	{
 		flagship && (
 			<section class="mt-14">
-				<div class="mb-4 flex items-center gap-2">
-					<span class="bg-accent/15 text-accent rounded px-2 py-0.5 text-xs font-semibold">
-						旗舰 · 实习
-					</span>
-					<h2 class="title text-lg">实习项目</h2>
-				</div>
+				<h2 class="title mb-4 text-lg">实习项目</h2>
 				<a
 					href={`/projects/${flagship.id}/`}
 					class="border-accent/40 hover:border-accent block rounded-lg border-2 p-6 transition-colors"

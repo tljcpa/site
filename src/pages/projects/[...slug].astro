@@ -21,7 +21,7 @@ const { Content } = await render(project);
 const { data } = project;
 ---
 
-<PageLayout meta={{ title: data.title, description: data.description }}>
+<PageLayout meta={{ title: data.title, description: data.description, articleDate: project.data.publishDate.toISOString() }}>
 	<a href="/projects/" class="text-muted hover:text-accent mb-6 inline-block text-sm">&larr; 项目</a>
 
 	<header class="mb-8">

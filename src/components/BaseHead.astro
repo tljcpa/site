@@ -83,4 +83,25 @@ const socialImageURL = new URL(ogImage ? ogImage : "/social-card.png", Astro.url
 	)
 }
 
+{/* JSON-LD 结构化数据(有日期的文章/项目页) */}
+{
+	articleDate && (
+		<script
+			type="application/ld+json"
+			set:html={JSON.stringify({
+				"@context": "https://schema.org",
+				"@type": "BlogPosting",
+				headline: title,
+				description,
+				datePublished: articleDate,
+				author: { "@type": "Person", name: siteConfig.author, url: siteConfig.url },
+				publisher: { "@type": "Person", name: siteConfig.author },
+				image: socialImageURL,
+				url: canonicalURL.href,
+				mainEntityOfPage: canonicalURL.href,
+			})}
+		/>
+	)
+}
+
 <meta content={Astro.generator} name="generator" />

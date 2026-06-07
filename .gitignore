@@ -40,3 +40,7 @@ tools/
 _repo_*
 _dg4
 _theme-tmp
+
+.wrangler/
+**/.wrangler/
+suggestions-api/dev.log

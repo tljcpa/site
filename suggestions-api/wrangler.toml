@@ -1,0 +1,9 @@
+name = "blog-suggestions"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+# D1 数据库绑定。database_id 由 `wrangler d1 create` 生成后回填。
+[[d1_databases]]
+binding = "DB"
+database_name = "blog-suggestions"
+database_id = "237d37b7-706e-4c9f-93d9-f5a7f2e55052"

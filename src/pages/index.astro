@@ -26,15 +26,19 @@ const complianceSeries = complianceOrder
 	.map((id) => posts.find((p) => p.id === id))
 	.filter((p) => p !== undefined);
 
-// 正在主攻:智驾/具身
-const drivingProject = projects.find((p) => p.id === "drivegpt4-mini");
+// 正在主攻:智驾/具身(driving 系列,按 weight 头牌在前)
+const drivingMains = projects
+	.filter((p) => p.data.series === "driving")
+	.sort((a, b) => b.data.weight - a.data.weight);
+const drivingMain = drivingMains[0];
+const drivingRest = drivingMains.slice(1);
 const drivingOrder = ["vla-action-tokenization", "qlora-memory-budget"];
 const drivingPosts = drivingOrder
 	.map((id) => posts.find((p) => p.id === id))
 	.filter((p) => p !== undefined);
 
-// 精选其他(排除已在智驾区的 drivegpt4)
-const featured = projects.filter((p) => p.data.featured && p.id !== "drivegpt4-mini");
+// 精选其他(排除已在智驾区展示的 driving 系列)
+const featured = projects.filter((p) => p.data.featured && p.data.series !== "driving");
 ---
 
 <PageLayout meta={{ title: "首页" }}>
@@ -101,7 +105,7 @@ const featured = projects.filter((p) => p.data.featured && p.id !== "drivegpt4-m
 
 	{/* 正在主攻:智驾 / 具身 */}
 	{
-		drivingProject && (
+		drivingMain && (
 			<section class="mt-14">
 				<div class="mb-4 flex items-center gap-2">
 					<span class="rounded bg-amber-400/20 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
@@ -110,23 +114,31 @@ const featured = projects.filter((p) => p.data.featured && p.id !== "drivegpt4-m
 					<h2 class="title text-lg">智驾 / 具身（VLA）</h2>
 				</div>
 				<p class="text-muted mb-4 text-sm">
-					我正在把上面那套大模型工程能力迁移到驾驶 / 具身方向。诚实说：这块还在攻坚期——目前是一个真实的小复现加上对前沿的系统理解，硬项目还在做。但方向明确，下面是起步。
+					我正在把大模型工程能力往具身 / 驾驶方向迁移。最近在一张免费 T4 上把 OpenVLA 在 LIBERO 机器人基准上闭环评测跑通了（含量化对照）——这条线从“读论文”落到了“真跑过 SOTA”。诚实说：有分量的训练和原创工作还在做，但地基在一块块搭。
 				</p>
 				<a
-					href={`/projects/${drivingProject.id}/`}
+					href={`/projects/${drivingMain.id}/`}
 					class="border-muted/40 hover:border-accent mb-3 block rounded-lg border p-5 transition-colors"
 				>
-					<h3 class="text-accent mb-2 text-lg font-semibold">{drivingProject.data.title}</h3>
-					<p class="text-muted mb-2 text-sm">{drivingProject.data.description}</p>
-					{drivingProject.data.highlight && (
+					<h3 class="text-accent mb-2 text-lg font-semibold">{drivingMain.data.title}</h3>
+					<p class="text-muted mb-2 text-sm">{drivingMain.data.description}</p>
+					{drivingMain.data.highlight && (
 						<p class="text-sm">
 							<span class="text-accent">→ </span>
-							{drivingProject.data.highlight}
+							{drivingMain.data.highlight}
 						</p>
 					)}
 				</a>
-				{drivingPosts.length > 0 && (
+				{(drivingRest.length > 0 || drivingPosts.length > 0) && (
 					<ul class="space-y-1.5" role="list">
+						{drivingRest.map((p) => (
+							<li class="text-sm">
+								<span class="text-muted mr-1">·</span>
+								<a href={`/projects/${p.id}/`} class="text-accent hover:underline">
+									{p.data.title}
+								</a>
+							</li>
+						))}
 						{drivingPosts.map((p) => (
 							<li class="text-sm">
 								<span class="text-muted mr-1">·</span>

@@ -44,3 +44,6 @@ _theme-tmp
 .wrangler/
 **/.wrangler/
 suggestions-api/dev.log
+
+# 项目接手手册:含脱敏黑名单(真实公司名),绝不入 public git
+/CLAUDE.md

@@ -116,6 +116,7 @@
 <p><strong>测试该确定性、脱网</strong> → 全 mock，不发真实 HTTP/不读真实 FS（数百单测照样快）。出处：CAD、Screenwright、各项目。</p>
 <h2 id="八安全--凭证"><a class="not-prose" href="#八安全--凭证">八、安全 / 凭证</a></h2>
 <p><strong>交接文档/脚本明文存了 IP/密码/key/邮箱</strong> → 反面教材：凭证该走环境变量/密钥管理，文档只写「在哪取」；交付包/git 只验最终干净。出处：CAD、模型微调、在线教育（多次）。</p>
+<p><strong>让 AI「参考另一个项目」会把那个项目的上下文整份吸进来，缝出跨项目幻觉</strong> → 一次真实事故：AI 把另一个项目的「部署到服务器」上下文吸入后，凭空编造了一台不存在的服务器、写进文件、坚称是我提供的，还编造了我的「原话」。关键动词（如「迁移」）要把宾语钉死；别无差别 dump 整份上下文。完整逐字复盘见<a href="/posts/context-pollution-confabulation/">这篇</a>。出处：某 AI 创新赛 × 七牛云。</p>
 <p><strong>CORS <code>allow_origins=["*"]</code> + <code>allow_credentials=True</code></strong> 会反射任意 Origin → credentials=False + 白名单。<strong>经反代真实 IP 在 <code>X-Forwarded-For</code> 首段</strong>，限流别用 <code>request.client.host</code>（那是 127.0.0.1）。出处：PR 审查、多平台、Screenwright。</p>
 <p><strong>公开 POST 接口要限流</strong>（怕 demo 被刷爆烧 API 余额）→ 进程内滑动窗口即可，别引重依赖。出处：PR、多平台、Screenwright。</p>
 <h2 id="九工具链"><a class="not-prose" href="#九工具链">九、工具链</a></h2>

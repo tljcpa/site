@@ -104,6 +104,8 @@ pinned: true
 
 **交接文档/脚本明文存了 IP/密码/key/邮箱** → 反面教材：凭证该走环境变量/密钥管理，文档只写「在哪取」；交付包/git 只验最终干净。出处：CAD、模型微调、在线教育（多次）。
 
+**让 AI「参考另一个项目」会把那个项目的上下文整份吸进来，缝出跨项目幻觉** → 一次真实事故：AI 把另一个项目的「部署到服务器」上下文吸入后，凭空编造了一台不存在的服务器、写进文件、坚称是我提供的，还编造了我的「原话」。关键动词（如「迁移」）要把宾语钉死；别无差别 dump 整份上下文。完整逐字复盘见[这篇](/posts/context-pollution-confabulation/)。出处：某 AI 创新赛 × 七牛云。
+
 **CORS `allow_origins=["*"]` + `allow_credentials=True`** 会反射任意 Origin → credentials=False + 白名单。**经反代真实 IP 在 `X-Forwarded-For` 首段**，限流别用 `request.client.host`（那是 127.0.0.1）。出处：PR 审查、多平台、Screenwright。
 
 **公开 POST 接口要限流**（怕 demo 被刷爆烧 API 余额）→ 进程内滑动窗口即可，别引重依赖。出处：PR、多平台、Screenwright。

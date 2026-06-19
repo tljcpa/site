@@ -76,6 +76,7 @@ GitHub 仓库 &rarr;
 <li><strong>本机无 GPU，bge-m3 嵌入 + vLLM/Qwen 改写整条链路没在真硬件上端到端跑过。</strong> README 里那些 P50 &#x3C; 200ms / &#x3C; 800ms、显存约 18GB 是<strong>设计目标值，不是实测</strong>——必须这么标。能验证的只有上面那 35 个纯 CPU 单测覆盖的部分；语义召回质量、改写质量、并发吞吐都未在真实硬件上验证。</li>
 <li><strong>缓存当前不省 LLM 调用</strong>：命中时只是把历史改写当「参考」喂进 prompt，不是直接返回缓存文本，所以<strong>命中仍调一次 LLM</strong>。这是怕「同词不同上下文直接套用出错」的保守设计，代价是只省了想策略、没省调用——「真正靠缓存降调用量」是明确待优化点。</li>
 <li><strong>语义检索粒度错配</strong>（最该先验证的假设）：把整段输入嵌成一个向量去和单个敏感词的向量算 cosine，句向量 vs 词向量本就错配，长文本会稀释信号。更优解（滑窗 / 分句逐段检索）没做。</li>
+<li><strong>缓存层上线前自查出的两个隐患</strong>（默认 <code>REDIS_ENABLED=false</code>，当前休眠未触发，但属于设计自洽性问题，如实记）：① <strong>缓存串味</strong>——key 只 hash「违规词集合」、与原文无关，两段不同原文只要违规词集合相同就撞同一 key；而缓存值是某条原文的整段改写全文，会作为【历史改写参考】注入下一条的 prompt，等于 A 的改写正文串味给 B。叠加「只缓存被改过的文本」那道门会放大。② <strong>连接故障下降级不优雅</strong>——Redis 建连没设 <code>socket_connect_timeout</code>，连接失败后 <code>_redis_client</code> 一直是 None、每个请求都重连重 ping；对一个静默丢包（防火墙 / 死机，非 connection-refused）的 host，<code>ping()</code> 会阻塞到 OS TCP 默认超时。所以上面说的「优雅降级」只在「没启用」时成立，「连不上」场景下并不优雅。解法：建连传 0.2s 超时 + 熔断时间戳，N 秒内不重试。</li>
 <li>其它缺口：超时默认值（30s）和文档（800ms）自相矛盾未修；多 worker 下 AC/Redis 进程内状态不共享；规则热更新需重启；CORS 全开 + 无鉴权（仅内网 / 演示）。</li>
 </ul>
 <h2 id="小结"><a class="not-prose" href="#小结">小结</a></h2>

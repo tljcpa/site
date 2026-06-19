@@ -70,7 +70,14 @@ GitHub 仓库 &rarr;
 </ol>
 <p>这些坑没法编，是真接了 LLM、跨了 Windows/Linux 才会撞上的。整个工程贯穿一个”LLM 不可靠”的防御式假设：配置找不到→硬编码兜底、LLM 挂了→原文当单个段落、JSON 不合法→剥围栏/补大小写。这是我觉得这个小项目里最实在的部分。</p>
 <h2 id="技术栈与诚实的边界"><a class="not-prose" href="#技术栈与诚实的边界">技术栈与诚实的边界</a></h2>
-<p>FastAPI 后端、Streamlit 前端、LangChain 管 prompt、智谱 GLM-4 出 JSON、python-docx 生成文档。要补一句诚实的：仓库里的 RAG（Chroma 向量库）在提交状态下是空的、默认学校的预设规则文件也不存在——所以 RAG 这条链路当时并没真正跑通，实际走的是兜底默认样式。</p>
+<p>FastAPI 后端、Streamlit 前端、LangChain 管 prompt、智谱 GLM-4 出 JSON、python-docx 生成文档。要补一句诚实的：仓库里的 RAG（Chroma 向量库）在提交状态下是空的，所以语义检索那条链路当时没真正跑通，实际走兜底默认样式。</p>
+<h2 id="后来补的ai-协作完成诚实标注"><a class="not-prose" href="#后来补的ai-协作完成诚实标注">后来补的（AI 协作完成，诚实标注）</a></h2>
+<p>回头给它做了一轮加固，几处值得记（这些是后来补的、AI 辅助完成，不是当年手搓）：</p>
+<ul>
+<li><strong>预设规则现在真存在了</strong>：补了一份本科毕设格式预设（真实学校规范——标题黑体三号、正文宋体小四、1.5 倍行距），<code>?school_id=…</code> 可直接套用。上面说的”预设规则文件不存在”已不成立。</li>
+<li><strong>表格渲染</strong>：用 <code>python-docx</code> 的 <code>add_table</code> 把识别出的二维表格真正插进 Word——支持二维数组和 <code>{rows:[…]}</code> 两种结构、自动补齐短行/空单元格、表头加粗、网格线、表标题置于表上方。一个有意的防御细节：<strong>非法表格数据降级成红色占位符、不中断整篇生成</strong>，和这个项目”假设 LLM 输出不可靠”的基调一致。</li>
+<li><strong>一个编不出来的真坑，正好解释”预设当年为什么没生效”</strong>：样式 schema 用的字段是 <code>family / size / bold</code>，而配置文件和 prompt 示例里写的是 <code>font_name / font_size / is_bold</code>。Pydantic v2 默认 <code>extra='ignore'</code>，于是这些对不上名的字段在构造配置时被<strong>静默丢弃</strong>——预设里的字体/字号/加粗全部失效，实际只有对齐生效。这就是预设长期”形同虚设”的根因，解法是把字段名统一到 schema（schema 为唯一真相源）。<strong>静默丢弃这种 bug 不报错，最难查。</strong></li>
+</ul>
 <h2 id="小结"><a class="not-prose" href="#小结">小结</a></h2>
 <p>这是个典型的”自己痛点驱动”的本科小工具。它有一个真正正确的硬核技巧（w:eastAsia
 ），一个有争议但自洽的架构（prompt 查表），和一段编不出来的真实调试史（6 个 fix 脚本）。我也借这次重写把当年”宣传大于实现”的几处如实更正了——回到代码看真相，比照着 README 复述，要靠谱得多。</p> </article>  <div id="sugg-root" data-api="https://blog-suggestions.zdwktlj.workers.dev"></div>  <script type="module" src="/_astro/SuggestionLayer.astro_astro_type_script_index_0_lang.ccxG1kWK.js"></script>  </main> <footer class="text-muted mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">

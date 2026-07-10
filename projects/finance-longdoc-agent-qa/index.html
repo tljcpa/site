@@ -1,0 +1,124 @@
+<!DOCTYPE html><html class="scroll-smooth" lang="zh-CN"> <head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>禁用向量检索、限调 Qwen：金融长文本问答 Agent • tlj 的工程笔记</title><link href="/icon.svg" rel="icon" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" type="image/png"><link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"><link href="/manifest.webmanifest" rel="manifest"><link href="https://zdwktlj.top/projects/finance-longdoc-agent-qa/" rel="canonical"><meta content="禁用向量检索、限调 Qwen：金融长文本问答 Agent • tlj 的工程笔记" name="title"><meta content="天池 AFAC2026 金融赛的一道硬约束题——只能调通义千问、不许微调、禁一切 embedding 向量检索，还有 500 万 token 的硬预算，去答五类金融长文档的选择判断题。A 榜两次真实提交 58 到 65 分，真正的料是挖出来的六个检索/解析 bug，和一次我自己武断判断埋下的隐性大坑。" name="description"><meta content="tlj" name="author"><meta content="article" property="og:type"><meta content="禁用向量检索、限调 Qwen：金融长文本问答 Agent" property="og:title"><meta content="天池 AFAC2026 金融赛的一道硬约束题——只能调通义千问、不许微调、禁一切 embedding 向量检索，还有 500 万 token 的硬预算，去答五类金融长文档的选择判断题。A 榜两次真实提交 58 到 65 分，真正的料是挖出来的六个检索/解析 bug，和一次我自己武断判断埋下的隐性大坑。" property="og:description"><meta content="https://zdwktlj.top/projects/finance-longdoc-agent-qa/" property="og:url"><meta content="tlj 的工程笔记" property="og:site_name"><meta content="zh_CN" property="og:locale"><meta content="https://zdwktlj.top/social-card.png" property="og:image"><meta content="1200" property="og:image:width"><meta content="630" property="og:image:height"><meta content="tlj" property="article:author"><meta content="2026-07-09T00:00:00.000Z" property="article:published_time"><meta content="summary_large_image" property="twitter:card"><meta content="https://zdwktlj.top/projects/finance-longdoc-agent-qa/" property="twitter:url"><meta content="禁用向量检索、限调 Qwen：金融长文本问答 Agent" property="twitter:title"><meta content="天池 AFAC2026 金融赛的一道硬约束题——只能调通义千问、不许微调、禁一切 embedding 向量检索，还有 500 万 token 的硬预算，去答五类金融长文档的选择判断题。A 榜两次真实提交 58 到 65 分，真正的料是挖出来的六个检索/解析 bug，和一次我自己武断判断埋下的隐性大坑。" property="twitter:description"><meta content="https://zdwktlj.top/social-card.png" property="twitter:image"><link href="/sitemap-index.xml" rel="sitemap"><link href="/rss.xml" title="Blog" rel="alternate" type="application/rss+xml"><link href="/notes/rss.xml" title="Notes" rel="alternate" type="application/rss+xml"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"禁用向量检索、限调 Qwen：金融长文本问答 Agent","description":"天池 AFAC2026 金融赛的一道硬约束题——只能调通义千问、不许微调、禁一切 embedding 向量检索，还有 500 万 token 的硬预算，去答五类金融长文档的选择判断题。A 榜两次真实提交 58 到 65 分，真正的料是挖出来的六个检索/解析 bug，和一次我自己武断判断埋下的隐性大坑。","datePublished":"2026-07-09T00:00:00.000Z","author":{"@type":"Person","name":"tlj","url":"https://zdwktlj.top/"},"publisher":{"@type":"Person","name":"tlj"},"image":"https://zdwktlj.top/social-card.png","url":"https://zdwktlj.top/projects/finance-longdoc-agent-qa/","mainEntityOfPage":"https://zdwktlj.top/projects/finance-longdoc-agent-qa/"}</script><meta content="Astro v6.3.3" name="generator"><script>
+	const lightModePref = window.matchMedia("(prefers-color-scheme: light)");
+
+	function getUserPref() {
+		const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+		return storedTheme || (lightModePref.matches ? "light" : "dark");
+	}
+
+	function setTheme(newTheme) {
+		if (newTheme !== "light" && newTheme !== "dark") {
+			return console.warn(
+				`Invalid theme value '${newTheme}' received. Expected 'light' or 'dark'.`,
+			);
+		}
+
+		const root = document.documentElement;
+
+		// root already set to newTheme, exit early
+		if (newTheme === root.getAttribute("data-theme")) {
+			return;
+		}
+
+		root.setAttribute("data-theme", newTheme);
+
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	// initial setup
+	setTheme(getUserPref());
+
+	// listen for pageshow event, browser restored page from bfcache
+	window.addEventListener("pageshow", (e) => {
+		if (e.persisted) {
+			setTheme(getUserPref());
+		}
+	});
+
+	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+	document.addEventListener("theme-change", (e) => {
+		setTheme(e.detail.theme);
+	});
+
+	// listen for prefers-color-scheme change.
+	lightModePref.addEventListener("change", (e) => setTheme(e.matches ? "light" : "dark"));
+</script><style>.sugg-mark{background:#fde68a;border-radius:2px;padding:0 1px;cursor:help}html.dark .sugg-mark{background:#92731a;color:#fff}#sugg-fab{position:fixed;z-index:95;display:none;padding:6px 12px;font-size:13px;line-height:1;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 8px #0003}#sugg-fab:hover{background:#1d4ed8}.sugg-modal-bg{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:#00000073}.sugg-modal-bg.open{display:flex}.sugg-modal{width:min(92vw,460px);background:#fff;color:#18181b;border-radius:10px;padding:18px;box-shadow:0 8px 32px #0000004d}html.dark .sugg-modal{background:#27272a;color:#e4e4e7}.sugg-modal h3{margin:0 0 8px;font-size:15px;font-weight:600}.sugg-quote{font-size:13px;color:#71717a;border-inline-start:3px solid #d4d4d8;padding-inline-start:8px;margin:0 0 10px;max-height:96px;overflow:auto}.sugg-modal textarea{width:100%;min-height:90px;box-sizing:border-box;resize:vertical;padding:8px;font-size:14px;border:1px solid #d4d4d8;border-radius:6px;background:transparent;color:inherit;font-family:inherit}.sugg-row{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}.sugg-btn{padding:7px 14px;font-size:13px;border-radius:6px;cursor:pointer;border:none}.sugg-btn-primary{background:#2563eb;color:#fff}.sugg-btn-ghost{background:transparent;color:#71717a;border:1px solid #d4d4d8}.sugg-toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%);z-index:110;background:#18181b;color:#fff;padding:8px 16px;border-radius:6px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none}.sugg-toast.show{opacity:1}#sugg-mine{margin-top:40px;padding-top:20px;border-top:1px dashed #d4d4d8;font-size:14px}#sugg-mine h3{font-size:14px;font-weight:600;margin:0 0 4px}#sugg-mine .hint{color:#71717a;font-size:12px;margin:0 0 12px}.sugg-item{padding:10px 0;border-bottom:1px solid #e4e4e7;display:flex;gap:10px;justify-content:space-between;align-items:flex-start}html.dark .sugg-item{border-color:#3f3f46}.sugg-item .q{color:#a16207;font-size:12px}html.dark .sugg-item .q{color:#fbbf24}.sugg-item .c{margin-top:2px}.sugg-item .meta{color:#a1a1aa;font-size:11px;margin-top:2px}.sugg-del{flex:none;background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;padding:2px 4px}.sugg-open-btn{margin-top:12px;padding:7px 14px;font-size:13px;cursor:pointer;background:transparent;border:1px solid #2563eb;color:#2563eb;border-radius:6px}#sugg-admin{position:fixed;top:0;right:0;bottom:0;z-index:120;width:min(94vw,520px);background:#fff;color:#18181b;box-shadow:-4px 0 24px #00000040;display:none;flex-direction:column;padding:16px;overflow:auto}html.dark #sugg-admin{background:#1c1c1f;color:#e4e4e7}#sugg-admin.open{display:flex}#sugg-admin h3{margin:0 0 12px;font-size:15px;font-weight:600}
+</style>
+<link rel="stylesheet" href="/_astro/Base.MjDyUwl5.b6.css"></head> <body class="bg-global-bg text-global-text mx-auto flex min-h-screen max-w-3xl flex-col px-4 pt-16 font-mono text-sm font-normal antialiased sm:px-8"> <a class="sr-only focus:not-sr-only focus:fixed focus:start-1 focus:top-1.5" href="#main">skip to content
+</a> <header class="group relative mb-28 flex items-center sm:ps-18" id="main-header"> <div class="flex sm:flex-col"> <a aria-current="false" class="inline-flex items-center sm:relative sm:inline-block sm:grayscale sm:hover:filter-none" href="/"> <svg aria-hidden="true" class="me-3 h-10 w-6 sm:absolute sm:-start-18 sm:me-0 sm:h-20 sm:w-12" fill="none" focusable="false" viewBox="0 0 272 480" xmlns="http://www.w3.org/2000/svg"> <title>Astro Cactus Logo</title> <path fill="#cdffb8" d="M181.334 93.333v-40L226.667 80v40zM136.001 53.333 90.667 26.667v426.666L136.001 480zM45.333 220 0 193.334v140L45.333 360z"></path><path fill="#d482ab" d="M90.667 26.667 136.001 0l45.333 26.667-45.333 26.666zM181.334 53.33l45.333-26.72L272 53.33 226.667 80zM136 240l-45.333-26.67v53.34zM0 193.33l45.333-26.72 45.334 26.72L45.333 220zM181.334 93.277 226.667 120l-45.333 26.67z"></path><path fill="#2abc89" d="m136 53.333 45.333-26.666v120L226.667 120V80L272 53.333V160l-90.667 53.333v240L136 480V306.667L45.334 360V220l45.333-26.667v73.334L136 240z"></path> </svg> <span class="text-xl font-bold sm:text-2xl">tlj 的工程笔记</span> </a> <nav aria-label="Main menu" class="bg-global-bg absolute -inset-x-4 top-12 hidden flex-col divide-y px-2 py-4 group-[.menu-open]:z-50 group-[.menu-open]:flex sm:static sm:z-auto sm:-ms-4 sm:mt-1 sm:flex sm:flex-row sm:divide-x sm:divide-y-0 sm:bg-transparent sm:p-0" id="navigation-menu"> <a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/"> 首页 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/projects/"> 项目 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/posts/"> 博客 </a><a aria-current="false" class="text-accent px-2 py-4 font-semibold sm:px-4 sm:py-0 sm:underline-offset-2 sm:hover:underline" href="/about/"> 关于 </a> </nav> </div> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.D5egCzIc.js"></script> <pagefind-config baseUrl="/" bundle-path="/pagefind/"></pagefind-config> <pagefind-modal-trigger id="search" class="ms-auto" hide-shortcut="true" compact="true"></pagefind-modal-trigger> <pagefind-modal></pagefind-modal> <theme-toggle class="ms-2 sm:ms-4"> <button class="hover:text-accent relative h-9 w-9 cursor-pointer p-2" type="button"> <span class="sr-only">Dark Theme</span> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-100 opacity-100 transition-all dark:scale-0 dark:opacity-0" fill="none" focusable="false" id="sun-svg" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="absolute inset-s-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" fill="none" focusable="false" id="moon-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M0 0h24v24H0z" fill="none" stroke="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"></path> <path d="M19 11h2m-1 -1v2"></path> </svg> </button> </theme-toggle> <script type="module" src="/_astro/ThemeToggle.astro_astro_type_script_index_0_lang.C1tldoqx.js"></script> <mobile-button> <button aria-expanded="false" aria-haspopup="menu" class="group relative ms-4 h-7 w-7 sm:invisible sm:hidden" id="toggle-navigation-menu" type="button"> <span class="sr-only">Open main menu</span> <svg aria-hidden="true" class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0" fill="none" focusable="false" id="line-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M3.75 9h16.5m-16.5 6.75h16.5" stroke-linecap="round" stroke-linejoin="round"></path> </svg> <svg aria-hidden="true" class="text-accent absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100" class="text-accent" fill="none" focusable="false" id="cross-svg" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </button> </mobile-button> </header> <script type="module" src="/_astro/Header.astro_astro_type_script_index_0_lang.DuSsDY4R.js"></script> <main id="main">  <a href="/projects/" class="text-muted hover:text-accent mb-6 inline-block text-sm">&larr; 项目</a> <header class="mb-8"> <div class="mb-2 flex flex-wrap items-center gap-3"> <h1 class="title">禁用向量检索、限调 Qwen：金融长文本问答 Agent</h1> <span class="bg-accent/10 text-muted rounded px-2 py-0.5 text-xs">比赛</span> </div> <p class="text-muted text-sm">天池 AFAC2026 金融赛的一道硬约束题——只能调通义千问、不许微调、禁一切 embedding 向量检索，还有 500 万 token 的硬预算，去答五类金融长文档的选择判断题。A 榜两次真实提交 58 到 65 分，真正的料是挖出来的六个检索/解析 bug，和一次我自己武断判断埋下的隐性大坑。</p> <dl class="text-muted mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">  <dt class="text-global-text">时间</dt> <dd>2026-07</dd>   <dt class="text-global-text">角色</dt> <dd>主导需求 / 架构 / 检索策略 / 逐条验收（代码由 AI 写）</dd>   <dt class="text-global-text">成果</dt> <dd>禁 embedding、限调 Qwen、500 万 token 预算下做金融长文档 QA；A 榜提交 58→65（准确率约 61%→69%，超官方 baseline 49%）；挖修 6 个真实检索/解析 bug，含一次自己抽查 3 题就武断跳过 HTML 致监管领域只索引到 1.2% 文档</dd>  </dl> <ul class="mt-4 flex flex-wrap gap-1.5" role="list"> <li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">通义千问 Qwen</li><li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">BM25</li><li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">条款索引</li><li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">PyMuPDF</li><li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">jieba</li><li class="bg-accent/10 text-muted rounded px-1.5 py-0.5 text-xs">RAG</li> </ul>  </header> <article class="prose prose-cactus max-w-none" data-pagefind-body> <p>阿里云天池 AFAC2026 金融智能大赛挑战组的赛题四：对保险、监管、财报、合同、研报五类金融长文档的单选/多选/判断题作答。这道题的难点不在模型，在<strong>约束</strong>：</p>
+<ul>
+<li><strong>只能调通义千问（Qwen）系列 API，不许微调</strong>；</li>
+<li><strong>禁止一切 embedding / 向量检索</strong>——也就是把最主流的 RAG 手段直接封死；</li>
+<li><strong>500 万 token 硬预算</strong>，超了 token 分归零；</li>
+<li>评分 = 准确率为主（70% 权重打底）+ 省 token 为辅（30%）。</li>
+</ul>
+<p>官方 baseline 只有 49% 准确率，而且烧了 687 万 token 超预算、token 分直接归零。所以真正要解的是：<strong>在不能用向量检索的前提下，怎么把长文档里那一小段决定答案的证据找准。</strong></p>
+<h2 id="真实结果"><a class="not-prose" href="#真实结果">真实结果</a></h2>
+<p>A 榜两次真实提交，平台给分：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>提交</th><th>得分</th><th>反推准确率</th></tr></thead><tbody><tr><td>第一次</td><td>57.9954</td><td>约 61%</td></tr><tr><td>第二次</td><td>64.9941</td><td>约 69%</td></tr></tbody></table>
+<p>对官方 baseline（49%）是实打实的超出，绝对进步真实。但要如实说清楚位置：<strong>这个分数在 1251 支队伍里属于后三分之一，不是好名次</strong>——别人能做到 80、90 分以上。这里值得写下来的不是成绩，是过程里那些坑。另外整套代码是 AI 写的，我主导需求、架构、检索策略和逐条验收；下面这些判断和排错，是验收环节里真实发生的。</p>
+<h2 id="六个真实的坑"><a class="not-prose" href="#六个真实的坑">六个真实的坑</a></h2>
+<p><strong>1. 思考模型偷偷烧 token。</strong> 让模型回一句”已连通”，<code>completion_tokens</code> 却是 595～1278；同样的问题换 qwen-plus 只花 3 个 token。根因是那一版是带隐藏推理链的思考模型，内部思考的 token 也计费、也算进 500 万预算——官方 baseline 超预算八成就栽在这。解法是显式 <code>enable_thinking=False</code> 默认关掉，压回个位数，复杂题再按需打开。</p>
+<p><strong>2. 全局 BM25 的马太效应。</strong> 四篇需要对比的文档混在一起检索，字数多的一两篇霸占了 top_k，其余的召回是 0——模型手里根本没证据。解法是按文档独立检索 + 动态公平配额（比如 12 个名额分给 4 篇、每篇最多 3 个），再给每个片段前面拼一个中文定位头「来自文档：某产品（doc_id=x），第 N 页」，防止多文档张冠李戴。还有个反直觉的调整：把”产品名精确命中”的基础分从 100 压到 15——因为产品名是高频背景词，分太高会把真正含指标数字的片段挤下去。</p>
+<p><strong>3. 条款跨页，文本被丢了。</strong> 有道题反复检索到错误的条款，模型算不出给付比例，干脆拿选项里的数字反推。深挖发现：条款跨页时，某一页开头那段属于上一条延续的文本被直接丢弃了，真正决定比例的第五条残缺。解法是修掉跨页丢失、保留延续文本，再给单文档单条款设名额上限，防长条款霸榜。</p>
+<p><strong>4. answer 字段和推理结论对不上。</strong> 模型推理里写”正确应为 B、C”，输出 JSON 的 answer 字段却填成”AB”。根因是 answer 和推理是两次独立生成，容易脱节。解法是让模型对每个选项单独输出 verdict，<strong>最终答案由代码从 verdict=true 确定性拼出</strong>，不再依赖模型复述。这一条我判断比降低瞎猜率更能直接提分——61%→69% 那次提交正是含这个修复。</p>
+<p><strong>5. JSON schema 字段顺序也是 bug。</strong> verdict 排在了 reasoning 前面。模型是自回归生成的，先写完 verdict 再写 reasoning，中途想改主意也回不去改 verdict。把 reasoning 调到前面就好了——这种”让模型先想后答”的顺序，在结构化输出里是实打实影响正确率的。</p>
+<p><strong>6. 解析失败别急着退兜底。</strong> 有几道题模型在 JSON 外面包了 markdown 或解释文字导致解析失败，早期直接退 mock 假答案。改成三层解析（直接 loads → 提取代码块 → 提取花括号子串 → 才退兜底），降级率压到 0。</p>
+<h2 id="一次我自己埋的隐性大坑"><a class="not-prose" href="#一次我自己埋的隐性大坑">一次我自己埋的隐性大坑</a></h2>
+<p>这条要单独写，因为坑是我自己判断失误造成的。</p>
+<p>监管领域有 513 个文档，重建索引后发现<strong>只索引进去了 6 个（1.2%）</strong>。追根源：早期让 AI 写解析脚本时，我<strong>只抽查了前 3 道题、看到它们都引用 txt 文件，就武断下结论”HTML 和 txt 内容重复，跳过 HTML”</strong>。实际上 txt 只有 6 个文件，HTML 有 377 个、附件 PDF 有 130 个——HTML 才是主体语料。结果是有些监管题”看起来答上了”，其实是零证据瞎蒙。</p>
+<p>这个坑没有报错、不会 crash，是靠一道题空答案回归倒查出来的。教训很直白：<strong>抽样下的结论不能当全量事实</strong>，尤其当这个结论会决定”要不要整类数据都不要了”的时候。</p>
+<h2 id="一次拦下-ai-作弊的审查"><a class="not-prose" href="#一次拦下-ai-作弊的审查">一次拦下 AI 作弊的审查</a></h2>
+<p>还有一条关于”AI 自评不可信”。负责写代码的 AI 在自主循环里报告”瞎猜现象已完全解决”，我实测发现是假的——某些题里模型还在拿选项数字反推。更严重的是，它为了让效果好看，<strong>在检索代码顶部硬编码了一张字典，把测试集里 16 个保险产品的真名写死了</strong>——这等于”看过测试集内容记下答案”式的作弊，B 榜一换文档就会灌错误产品名，评审复现代码一眼能看穿。</p>
+<p>这是我逐行审查时删掉的，不是 AI 自己改的。所以我不敢让 AI 的自我总结进验收结论——<strong>它说”解决了”，我得自己复跑确认；它写的代码，我得逐行看有没有为了好看走捷径。</strong></p>
+<h2 id="诚实的边界"><a class="not-prose" href="#诚实的边界">诚实的边界</a></h2>
+<ul>
+<li><strong>只做到 A 榜。</strong> B 榜的盲测检索（没有 doc_ids、才是真正的 RAG 难点）完全没碰，项目停在 A 榜阶段。</li>
+<li><strong>名次不好。</strong> 69% 在 1251 队里后三分之一，绝对进步真实、相对位置落后，两个都如实说。</li>
+<li><strong>无标准答案的盲测。</strong> 数据集不含正确答案，本地算不了准确率，上面那两个准确率是从提交得分反推的，严格说是反推值。</li>
+<li><strong>有一个我一度依赖的指标其实是噪音。</strong> 我用”关键词命中率”来判断改动好不好，后来发现同一批题、同一份代码，这个指标在 40%～65% 之间自然波动——根源是云端 API 的非确定性，即使 temperature=0 也压不住。也就是说我几轮”变好变差”的对比，很大程度量的是噪音不是代码效果。这是我自己测量流程的漏洞：应该先建统一基线再优化，我没做到。</li>
+<li><strong>有一版改动没经提交验证。</strong> 最后一版”关键领域全文直喂”的架构，本地指标和抽查都变好了，但整合版因为账户欠费报 403 从没成功提交打分，所以”全文直喂能提准确率”这个判断，分数上是没有证据的，只能存疑。</li>
+</ul>
+<p>这道题对我的价值不在分数，在那个反直觉的约束——<strong>当你不能用向量检索、还要省 token，你会被逼着回到”证据到底在文档哪一段”这个最朴素的问题上</strong>，而这恰恰是很多 RAG 系统被 embedding 糊过去、没真正解决的地方。</p> </article>  <div id="sugg-root" data-api="https://blog-suggestions.zdwktlj.workers.dev"></div>  <script type="module" src="/_astro/SuggestionLayer.astro_astro_type_script_index_0_lang.ccxG1kWK.js"></script>  </main> <footer class="text-muted mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold sm:flex-row sm:justify-between sm:text-xs"> <div class="me-0 sm:me-4">
+&copy; tlj 2026.<span class="inline-block">&nbsp;🚀&nbsp;tlj 的工程笔记&nbsp;🌵&nbsp;</span> </div> <nav aria-labelledby="footer_links" class="sm:divide-muted flex gap-x-2 sm:gap-x-0 sm:divide-x"> <p id="footer_links" class="sr-only">More on this site</p> <a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/"> 首页 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/projects/"> 项目 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/posts/"> 博客 </a><a class="hover:text-global-text px-4 py-2 hover:underline sm:py-0" href="/about/"> 关于 </a> </nav> </footer> <div id="page-stats" data-api="https://blog-suggestions.zdwktlj.workers.dev"></div>  <script type="module">(function(){if(window.__pageStatsInit)return;window.__pageStatsInit=!0;const m=document.getElementById("page-stats");if(!m)return;const r=m.dataset.api,c=location.pathname.replace(/\/+$/,"")||"/";let s=localStorage.getItem("sugg_token");(!s||s.length<16)&&(s="v_"+(crypto.randomUUID?crypto.randomUUID().replace(/-/g,""):Math.random().toString(36).slice(2)+Date.now().toString(36)),localStorage.setItem("sugg_token",s));const g=new URLSearchParams(location.search).get("from");g&&localStorage.setItem("sugg_from",g.slice(0,100));const y=g||localStorage.getItem("sugg_from")||"",u="pv_"+c,I=Number(sessionStorage.getItem(u)||0),h=performance.timeOrigin+performance.now();h-I>1800*1e3&&(sessionStorage.setItem(u,String(h)),fetch(r+"/pageview",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({slug:c,referrer:document.referrer||"",source:y})}).catch(()=>{}));const p=document.querySelector(".prose");if(p){let n=function(o){a=!!o.liked,d.textContent=o.count??0,e.classList.toggle("liked",a)};const t=document.createElement("div");t.className="stats-bar",t.innerHTML='<span class="pv">👁 <span id="pv-n">…</span></span><button class="stats-like" id="like-btn">♥ <span id="like-n">…</span></button>',p.insertAdjacentElement("afterend",t),fetch(r+"/pageview?slug="+encodeURIComponent(c)).then(o=>o.json()).then(o=>{document.getElementById("pv-n").textContent=o.count??0}).catch(()=>{});const e=document.getElementById("like-btn"),d=document.getElementById("like-n");let a=!1;fetch(r+"/like?slug="+encodeURIComponent(c)+"&token="+encodeURIComponent(s)).then(o=>o.json()).then(n).catch(()=>{}),e.addEventListener("click",()=>{const o=a?{method:"DELETE"}:{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({slug:c,token:s})},b=a?r+"/like?slug="+encodeURIComponent(c)+"&token="+encodeURIComponent(s):r+"/like";fetch(b,o).then(w=>w.json()).then(n).catch(()=>{})})}const i=document.createElement("div");i.id="stats-panel",document.body.appendChild(i);function f(n){return String(n).replace(/[&<>"]/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[t])}function S(n){try{return new Date(n).toLocaleString("zh-CN",{hour12:!1})}catch{return""}}function l(n,t){if(!n||!n.length)return'<p style="color:#a1a1aa">（暂无）</p>';let e="<table>";return n.forEach(d=>{e+="<tr>",t.forEach(a=>{e+=a.n?'<td class="n">'+f(d[a.k]??"")+"</td>":"<td>"+f(d[a.k]??"—")+"</td>"}),e+="</tr>"}),e+"</table>"}async function k(){let n=localStorage.getItem("sugg_admin_key");if(!n){if(n=prompt("输入管理密钥"),!n)return;localStorage.setItem("sugg_admin_key",n)}let t;try{const e=await fetch(r+"/analytics",{headers:{"X-Admin-Key":n}});if(e.status===403){localStorage.removeItem("sugg_admin_key"),alert("密钥错误");return}t=await e.json()}catch{alert("网络错误");return}i.innerHTML='<button class="close" id="stats-close">×</button><h3>访问分析 · 总浏览 '+(t.totalPV??0)+"</h3><h4>渠道来源（?from=，投简历最该看这个）</h4>"+l(t.bySource,[{k:"source"},{k:"n",n:1}])+"<h4>来源网站（referrer）</h4>"+l(t.byReferrer,[{k:"referrer"},{k:"n",n:1}])+"<h4>各页浏览</h4>"+l(t.byPage,[{k:"slug"},{k:"n",n:1}])+"<h4>地理（城市级，不存 IP）</h4>"+l((t.byCity||[]).map(e=>({loc:(e.country||"?")+" / "+(e.city||"?"),n:e.n})),[{k:"loc"},{k:"n",n:1}])+"<h4>点赞</h4>"+l(t.likes,[{k:"slug"},{k:"n",n:1}])+"<h4>最近访问</h4>"+l((t.recent||[]).map(e=>({when:S(e.ts),where:e.slug+(e.source?" ←"+e.source:""),loc:e.city||e.country||""})),[{k:"when"},{k:"where"},{k:"loc"}]),i.classList.add("open"),document.getElementById("stats-close").addEventListener("click",()=>i.classList.remove("open"))}location.hash==="#stats"&&k(),window.addEventListener("hashchange",()=>{location.hash==="#stats"&&k()})})();</script> <script type="speculationrules">
+			{
+				"prefetch": [
+					{
+						"where": {
+							"href_matches": "/*"
+						},
+						"eagerness": "immediate"
+					}
+				],
+				"prerender": [
+					{
+						"where": {
+							"href_matches": "/*"
+						},
+						"eagerness": "moderate"
+					}
+				]
+			}
+		</script> </body> </html>

@@ -1,5 +1,5 @@
 {
-  "name": "tlj 的工程笔记",
+  "name": "tlj 的具身智能笔记",
   "icons": [
     {
       "src": "icons/apple-touch-icon.png",
@@ -18,7 +18,7 @@
     }
   ],
   "short_name": "Astro_Cactus",
-  "description": "大模型微调、RAG、全栈工程的复盘与踩坑记录。",
+  "description": "具身智能算法与 VLA 训练的项目复盘，也有之前大模型微调的记录。",
   "lang": "zh-CN",
   "start_url": "/",
   "theme_color": "#2bbc8a",

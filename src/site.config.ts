@@ -3,10 +3,10 @@ import type { SiteConfig } from "@/types";
 
 export const siteConfig: SiteConfig = {
 	url: "https://zdwktlj.top/",
-	title: "tlj 的工程笔记",
+	title: "tlj 的具身智能笔记",
 	// TODO(wly): 对外公开用的名字 / handle
 	author: "tlj",
-	description: "大模型微调、RAG、全栈工程的复盘与踩坑记录。",
+	description: "具身智能算法与 VLA 训练的项目复盘，也有之前大模型微调的记录。",
 	// 站点主语言改中文
 	lang: "zh-CN",
 	ogLocale: "zh_CN",

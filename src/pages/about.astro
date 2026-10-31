@@ -2,7 +2,7 @@
 import PageLayout from "@/layouts/Base.astro";
 
 const meta = {
-	description: "关于 tlj——具身智能工程：机械臂、遥操作采集、VLA 训练。",
+	description: "关于 tlj：做具身智能算法，主要是 VLA。",
 	title: "关于",
 };
 ---
@@ -11,16 +11,16 @@ const meta = {
 	<h1 class="title mb-12">关于</h1>
 	<div class="prose prose-sm prose-cactus max-w-none">
 		<p>
-			我是 tlj，现在做具身智能。实际做过的包括：双臂机械臂上 π0.5 策略的人在回路优化流程、PICO 头显遥操作与数据采集、五指灵巧手集成、把数采平台移植到嵌入式板并自写电机驱动，以及几场 VLA 和人形机器人比赛。在这之前，我在一个内容合规质检项目里做过大模型从数据、微调、评估到部署的完整落地。
+			我是 tlj，做具身智能算法。手上的事基本围着 VLA 转：在双臂机械臂上给 π0.5 设计人工接管再微调的流程，在国产 GPU 上续训 π0，参加 VLA 和人形机器人的比赛。模型要数据，所以 PICO 遥操作采集、灵巧手接入、数采平台往嵌入式板上移植这些活我也干了不少。
+		</p>
+		<p>
+			之前在一个内容合规质检的实习里，把大模型从造数据、QLoRA 微调、评估到部署走了一遍。那段经历教会我的主要是一件事：指标好看不等于模型真的好，评估要先信得过。现在做机器人也是这样，真机成功率没测出来之前，我不会说它变好了。
 		</p>
 		<p class="border-accent/30 bg-accent/5 rounded-md border-l-2 px-4 py-3">
 			我现在在<strong>北京</strong>。在做具身智能或大模型方向，或者想聊聊上面哪个项目，欢迎找我——邮件 <a class="cactus-link inline-block" href="mailto:zdwktlj@outlook.com">zdwktlj@outlook.com</a> / <a class="cactus-link inline-block" href="mailto:zdwktlj@gmail.com">zdwktlj@gmail.com</a>，或者直接在站里任意一段文字上划线给我提建议（只有你和我看得到）。
 		</p>
 		<p>
-			比起结论，我更想记录过程：一个东西为什么这么设计、踩过哪些坑、当时在几个方案之间怎么权衡。这些在教程里很少见，却常常是真正花掉时间的地方。没做成的部分我也照实写，做到哪写到哪，不替没验证过的结论背书。
-		</p>
-		<p>
-			看到比我强的工作和人，我习惯先搞清楚它为什么强，再想办法追上去。技术上我更认实质，不太想在包装上费功夫。
+			这里写的多是过程：为什么这么做，换过哪些方案，哪一步出的问题。没做成的也照写。
 		</p>
 		<p>
 			想看做过什么，去 <a class="cactus-link inline-block" href="/projects/">项目</a>；想看过程，翻 <a class="cactus-link inline-block" href="/posts/">博客</a>。

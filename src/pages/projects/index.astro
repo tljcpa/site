@@ -17,7 +17,7 @@ const groups = [
 const embodiedGroup = {
 	kind: "embodied",
 	label: "具身智能",
-	note: "机械臂、灵巧手、遥操作采集、VLA 训练与人形机器人比赛。",
+	note: "VLA 训练与优化、人形机器人比赛，以及为了拿到数据做的遥操作和硬件接入。",
 	items: projects.filter((p) => p.data.series === "embodied"),
 };
 const grouped = [
@@ -38,7 +38,7 @@ const meta = {
 <PageLayout meta={meta}>
 	<h1 class="title mb-2">项目</h1>
 	<p class="text-muted mb-10 text-sm">
-		具身智能放在最前,其余按类型分组。每个卡片点进去是这个项目怎么从零跑起来、踩过哪些坑的复盘。
+		具身的放最前面，其余按类型分。点进去是每个项目做到哪、卡在哪。
 	</p>
 
 	{

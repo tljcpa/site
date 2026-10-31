@@ -44,12 +44,12 @@ const featured = projects.filter((p) => p.data.featured && p.data.series !== "em
 <PageLayout meta={{ title: "首页" }}>
 	{/* 定位 */}
 	<section>
-		<h1 class="title mb-4 text-2xl sm:text-3xl">tlj · 具身智能工程</h1>
+		<h1 class="title mb-4 text-2xl sm:text-3xl">tlj · 具身智能算法</h1>
 		<p class="text-muted mb-4">
-			我现在做具身智能：双臂机械臂的 VLA 策略优化、VR 遥操作与数据采集、灵巧手集成、嵌入式板上的驱动移植，也参加 VLA 和人形机器人方向的比赛。之前做过大模型工程的完整落地（数据、微调、评估、部署），这些经验现在用在机器人数据和训练上。
+			我做具身智能算法，偏落地那一侧。最近主要在折腾 VLA：π0.5 在双臂机械臂上怎么用人工接管的数据接着训，π0 在国产卡上能不能续训起来，ACT 和人形运控在比赛里跑到什么程度。为了让模型有数据可学，遥操作采集、灵巧手、板子上的驱动也都自己上手弄过。
 		</p>
 		<p class="text-muted mb-4 text-sm">
-			下面是工程复盘：做了什么、踩了哪些坑、做到哪一步。没做完的部分照实写。
+			再往前是做大模型微调和评估。这里记的是每个项目实际做到哪了、卡在哪，没跑出数的就写没跑出来。
 		</p>
 		<SocialList />
 		<p class="text-muted mt-4 text-sm">
@@ -62,7 +62,7 @@ const featured = projects.filter((p) => p.data.featured && p.data.series !== "em
 		embodied.length > 0 && (
 			<section class="mt-14">
 				<h2 class="title mb-1 text-lg">具身智能</h2>
-				<p class="text-muted mb-5 text-sm">真机与实习项目在前，比赛和复现在后。</p>
+				<p class="text-muted mb-5 text-sm">先放真机上做的，比赛和复现在后面。</p>
 				<ul class="grid grid-cols-1 gap-4 sm:grid-cols-2" role="list">
 					{embodiedReal.map((p) => (
 						<li class="border-muted/40 hover:border-accent flex flex-col rounded-md border p-4 transition-colors">
@@ -107,7 +107,7 @@ const featured = projects.filter((p) => p.data.featured && p.data.series !== "em
 	{
 		flagship && (
 			<section class="mt-14">
-				<h2 class="title mb-4 text-lg">大模型工程：合规质检模型（实习）</h2>
+				<h2 class="title mb-4 text-lg">之前做的：合规质检模型微调（实习）</h2>
 				<a
 					href={`/projects/${flagship.id}/`}
 					class="border-accent/40 hover:border-accent block rounded-lg border-2 p-6 transition-colors"

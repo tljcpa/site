@@ -3,7 +3,7 @@ title: "为什么一张 24G 卡能微调 14B 大模型：把 QLoRA 的显存账�
 description: "全量微调 14B 要 150GB+ 显存，但我的合规模型就是在一张 24G 的 4090 上 QLoRA 微调出来的。这篇把账一笔笔算清楚：LoRA 省的是哪块、量化省的是哪块、为什么 T4 卡连 bf16 都不支持。"
 publishDate: "2026-06-06"
 tags: ["模型微调", "原理", "QLoRA"]
-series: driving
+series: "embodied"
 ---
 
 我的[合规质检模型](/projects/content-moderation-finetune/)是 Qwen2.5-14B，在一张 24GB 的 RTX 4090 上 QLoRA 微调出来的；[drivegpt4 迷你复现](/projects/drivegpt4-mini/)是 Qwen2-VL-2B，显存只用了 7.28GB。每次说起这个都有人问：14B 全量微调动辄要上百 GB 显存，你一张消费级卡怎么塞下的？

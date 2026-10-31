@@ -7,7 +7,8 @@ role: "外援：问题定位、方案取舍、实机验证与交接（代码与�
 period: "2026-10"
 highlight: "全链路首次贯通；问题台账 35 项闭环 33 项；三路相机并发 27.5fps、新增带宽错误 0 条；交接时 4 个问题未解决"
 stack: ["RDK S100P", "RT Linux 6.1", "Python", "ctypes", "CAN", "达妙 DM4340P / DM4310", "MIT 模式", "UVC", "MQTT", "WebRTC", "FastAPI", "React", "PICO VR"]
-weight: 35
+series: "embodied"
+weight: 44
 ---
 
 以外援身份参与的项目。某机器人公司有一套自研的双臂数据采集平台（FastAPI 后端、React 前端、Python Worker、MQTT/WebRTC），已经在原平台上交付。我的任务是把它移植到 RDK S100P 板上。

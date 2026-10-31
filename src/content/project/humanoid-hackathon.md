@@ -7,7 +7,7 @@ role: "需求与赛道取舍、技术路线拍板、质疑与验收（代码由 
 period: "2026-06 ~ 2026-08"
 highlight: "两赛道均在截止前完成提交：运控自测净前进 0.209 m/s、直立 71.6%；VLA 五任务各约 25 次执行全部 task-ok。无官方成绩，VLA 闭环成功率约 0 且已诊断到底"
 stack: ["Isaac Sim 5.1", "IsaacLab 2.3", "TienKung-Lab", "AMP/RSL-RL", "ACT", "PyTorch", "ONNX", "MuJoCo", "ZMQ"]
-series: "driving"
+series: "embodied"
 featured: true
 weight: 66
 ---

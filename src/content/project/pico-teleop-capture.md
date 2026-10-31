@@ -7,7 +7,8 @@ role: "需求拆解、方案取舍、实机测试与验收（代码由 AI 编写
 period: "2026-06 ~ 2026-10"
 highlight: "APK 从 0.2.0 迭代到 0.5.13，版本号从不复用；NTP 式四时间戳时钟同步；X 键录、Y 键丢的 LeRobot v3 episode 采集；全景录制目前只到试采水平"
 stack: ["Unity 2022.3", "C#", "PICO SDK", "XR Interaction Toolkit", "Python", "GStreamer", "ROS 2 Humble", "LeRobot", "Parquet", "Docker"]
-weight: 38
+series: "embodied"
+weight: 45
 ---
 
 在某机器人公司实习期间做的，分两条线，底座都是开源的 [XRoboToolkit](https://github.com/XR-Robotics)。

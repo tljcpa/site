@@ -8,7 +8,7 @@ period: "2026-06"
 highlight: "QLoRA 微调后 loss 2.087→1.428（↓31%），7.28GB 显存跑通；7 个真实坑，含 FSDP 版本坑与 SDPA shape bug 的诊断心法"
 stack: ["Qwen2-VL-2B", "QLoRA", "ms-swift", "Azure GPT-4.1-mini", "RTX 4090"]
 weight: 62
-series: driving
+series: "embodied"
 featured: true
 ---
 

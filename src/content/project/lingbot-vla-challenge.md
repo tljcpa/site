@@ -7,7 +7,7 @@ role: "赛题研读、算力与步数取舍、值守与验收（训练和评测�
 period: "2026-09 ~ 2026-10"
 highlight: "限时额度内完成 7000 步全参训练（37 小时 53 分，loss 0.0307）和 97/100 个任务自测；普通上传撞上 5GB 限制后改走 STS 分片上传，截止前约 8 小时提交成功"
 stack: ["LingBot-VLA-v2-6B", "RoboTwin 2.0", "ROCm 7.2.1", "PyTorch 2.9.1", "FSDP2", "Radeon PRO W7900", "LeRobot v3.0", "ossutil"]
-series: "driving"
+series: "embodied"
 weight: 63
 ---
 

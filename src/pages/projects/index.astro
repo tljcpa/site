@@ -6,28 +6,39 @@ const projects = await getAllProjects(); // 已按 weight 降序
 
 // 按类型分组,顺序即重要性。组内保持 weight 序。
 const groups = [
-	{ kind: "实习", label: "实习项目", note: "真实企业实习,从数据到部署的完整工程链路。" },
-	{ kind: "比赛", label: "竞赛作品", note: "七牛云、智联等比赛里做的东西。" },
+	{ kind: "实习", label: "实习项目", note: "大模型方向的企业实习,从数据到部署。" },
+	{ kind: "比赛", label: "竞赛作品", note: "大模型应用方向的比赛作品。" },
 	{ kind: "面试作品", label: "面试项目", note: "面试中独立完成的作品,公司与题目已脱敏,保留技术方案。" },
 	{ kind: "开源复现", label: "开源复现", note: "复现前沿工作,验证技术路线、踩透框架坑。" },
 	{ kind: "个人", label: "个人项目", note: "自己起意做的工具,从零跑起来。" },
 	{ kind: "学习", label: "学习记录", note: "边学边做的过程,诚实包含没做完的。" },
 ];
 
-const grouped = groups
-	.map((g) => ({ ...g, items: projects.filter((p) => p.data.kind === g.kind) }))
+const embodiedGroup = {
+	kind: "embodied",
+	label: "具身智能",
+	note: "机械臂、灵巧手、遥操作采集、VLA 训练与人形机器人比赛。",
+	items: projects.filter((p) => p.data.series === "embodied"),
+};
+const grouped = [
+	embodiedGroup,
+	...groups.map((g) => ({
+		...g,
+		items: projects.filter((p) => p.data.kind === g.kind && p.data.series !== "embodied"),
+	})),
+]
 	.filter((g) => g.items.length > 0);
 
 const meta = {
 	title: "项目",
-	description: "我做过的项目——按类型分组:实习、竞赛、面试作品、开源复现、个人、学习。",
+	description: "我做过的项目:具身智能在前,其余按类型分组。",
 };
 ---
 
 <PageLayout meta={meta}>
 	<h1 class="title mb-2">项目</h1>
 	<p class="text-muted mb-10 text-sm">
-		近三个月的活儿,按类型分组、从最有分量的排起。每个卡片点进去是这个项目怎么从零跑起来、踩过哪些坑的复盘。
+		具身智能放在最前,其余按类型分组。每个卡片点进去是这个项目怎么从零跑起来、踩过哪些坑的复盘。
 	</p>
 
 	{

@@ -7,7 +7,7 @@ role: "实训营选拔挑战提交（我定方案、选路线、逐帧验收；�
 period: "2026-06"
 highlight: "Isaac Sim + RSL-RL PPO 训 DexEVT 人形动作模仿；自定义迁移（LAFAN1→xGMR）aim 动作终止率 3% / reward 17；核心坑是 24-body vs 39-body 不匹配导致 reward 冻结、机器人秒倒"
 stack: ["xMimic", "Isaac Sim 5.1", "Isaac Lab", "RSL-RL PPO", "DexEVT", "LAFAN1", "xGMR", "ONNX"]
-series: "driving"
+series: "embodied"
 weight: 60
 ---
 

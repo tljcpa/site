@@ -7,7 +7,7 @@ role: "独立完成(评测复现 + 量化对照)"
 period: "2026-06"
 highlight: "OpenVLA 7B 在 LIBERO 闭环评测全 10 任务;量化曲线 4-bit 64% → 8-bit 76.7% → 论文 84.7%;2026 镜像跑 2024 代码的 9 个工程坑"
 stack: ["OpenVLA-7B", "LIBERO", "robosuite/MuJoCo", "4-bit/8-bit 量化", "Kaggle T4"]
-series: "driving"
+series: "embodied"
 featured: true
 weight: 72
 ---

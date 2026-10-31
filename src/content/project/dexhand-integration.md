@@ -7,7 +7,8 @@ role: "需求拆解、现场接线与验证、方案取舍（代码由 AI 编写
 period: "2026-10"
 highlight: "双手 Modbus 扫描均在线；7 段内置动作各采 28 个反馈样本；旁路录制 10 秒冒烟，164 行 JSONL 转出 139 帧 26 维 LeRobot v3 数据"
 stack: ["Python", "ROS 2 Humble", "Modbus RTU", "pyserial", "OpenSCAD", "LeRobot", "Parquet"]
-weight: 36
+series: "embodied"
+weight: 43
 ---
 
 实习期间的一项集成任务：给某协作机器人装上一款五指灵巧手，让它能通过数据手套遥操作，并把运行数据录成 LeRobot 格式。

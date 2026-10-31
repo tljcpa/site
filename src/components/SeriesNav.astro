@@ -19,11 +19,11 @@ const ORDERS: Record<string, string[]> = {
 		"compliance-eval-methodology",
 		"compliance-pitfalls-reference",
 	],
-	driving: ["vla-action-tokenization", "qlora-memory-budget"],
+	embodied: ["vla-action-tokenization", "qlora-memory-budget"],
 };
 const LABELS: Record<string, string> = {
 	compliance: "合规质检模型 · 深度复盘系列",
-	driving: "智驾 / 具身（VLA）· 系列笔记",
+	embodied: "具身智能 · 系列笔记",
 };
 
 const order = series ? ORDERS[series] : undefined;

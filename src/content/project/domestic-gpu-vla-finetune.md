@@ -7,6 +7,7 @@ role: "路线选择、算力调度与验收（数据转换、训练和备份脚�
 period: "2026-10"
 highlight: "π0 LoRA 从第 6000 步完整恢复续训到第 7500 步，loss 由 0.81 降到 0.29 左右；454 episode、66,984 帧全量转换并核验，无静默丢帧"
 stack: ["π0", "LeRobot v2.1", "LIBERO Object", "OpenDM", "RLDS", "COREX PyTorch", "天数智芯 GPU", "LoRA"]
+series: "embodied"
 weight: 37
 ---
 

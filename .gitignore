@@ -51,3 +51,12 @@ suggestions-api/dev.log
 # 本地手册相关(含脱敏黑名单/真实公司名,永不入 public git)
 /tmp/
 /docs/§0-历史.md
+
+# 会话解析残留,绝不入 public git
+tmp/
+work/
+_work/
+/*.txt
+!/robots.txt
+/*.py
+/*.pkl
